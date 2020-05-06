@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:orientation="vertical"
+android:padding="15dp"
+android:layout_height="match_parent"
+tools:context=".Cliente.PerfilCliente.direcciones_cliente">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Direccion: " />
+
+            <EditText
+                android:id="@+id/txt_direccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:paddingTop="15dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:text="Comuna: " />
+
+            <EditText
+                android:id="@+id/txt_Comuna"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:paddingTop="15dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView19"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="13dp"
+                android:text="Ciudad: " />
+
+            <EditText
+                android:id="@+id/txt_Ciudad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:paddingTop="15dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <TextView
+    android:layout_width="wrap_content"
+    android:textSize="30dp"
+    android:layout_margin="10dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:text="Mis Direcciones" />
+
+<ListView
+    android:id="@+id/lv_datosPersonas"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+
+</LinearLayout >

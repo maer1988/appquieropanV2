@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Cliente.CarroDeCompras.CarroComprasCliente">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior"
+            />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/botones_navegacion_inicio_carro"
+        android:layout_below="@id/tolbarCliente"
+        android:padding="10dp"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/imgProdClienteCarro"
+            android:layout_width="match_parent"
+            android:layout_height="102dp"
+            android:background="#7E6363"
+            android:src="@drawable/imagen_no_disponible" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="CARRO DE COMPRAS"
+            android:textColor="#4E070C"
+            android:textSize="25sp" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/crear_boton"
+            android:background="#C8C9CB" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:text="UNIDAD O KILO: "
+                android:textColor="@drawable/txt_boton_factura" />
+
+            <TextView
+                android:id="@+id/idSelUnidad"
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente_dos"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:textColor="@drawable/txt_btn_opciones" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:text="CANTIDAD: "
+                android:textColor="@drawable/txt_boton_factura" />
+
+            <TextView
+                android:id="@+id/idSelCantidad"
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente_dos"
+                android:gravity="left|center"
+                android:inputType="number"
+                android:paddingLeft="10dp"
+                android:textColor="@drawable/txt_btn_opciones" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:text="TIPO COMPRA: "
+                android:textColor="@drawable/txt_boton_factura" />
+
+            <TextView
+                android:id="@+id/idSelTipoCompra"
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente_dos"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:textColor="@drawable/txt_btn_opciones" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:text="TIPO ENTREGA: "
+                android:textColor="@drawable/txt_boton_factura" />
+
+            <TextView
+                android:id="@+id/idSelTipoEntrega"
+                android:layout_width="165dp"
+                android:layout_height="57dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_opciones_cliente_dos"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:textColor="@drawable/txt_btn_opciones" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="51dp">
+
+            <Button
+                android:id="@+id/btnguardar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/botones_navegacion"
+                android:layout_gravity="left"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="1dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_qpan_general_inicio"
+                android:text="guardar"
+                android:textColor="@drawable/txt_btn_general_inicio" />
+
+            <Button
+                android:id="@+id/btncancelar"
+                android:layout_width="178dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="1dp"
+                android:background="@drawable/btn_qpan_general_inicio"
+                android:text="Pagar/Reservar"
+                android:textColor="@drawable/txt_btn_general_inicio" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/botones_navegacion_inicio_carro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior_cliente"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+</RelativeLayout>

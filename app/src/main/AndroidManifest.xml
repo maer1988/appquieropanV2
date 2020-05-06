@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.appquieropan">
+    <!--
+         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
+         Google Maps Android API v2, but you must specify either coarse or fine
+         location permissions for the 'MyLocation' functionality.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".Cliente.PerfilCliente.direcciones_cliente"
+            android:label="@string/title_activity_direcciones_cliente"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".Proveedor.Ventas.cerrar_voucher" />
+        <activity
+            android:name=".Proveedor.evalucion.Evaluacion_proveedor"
+            android:label="@string/title_activity_evaluacion_proveedor"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Proveedor.Ventas.ListadoItemVoucher_Proveedor" />
+        <activity android:name=".Adaptadores.Proveedor.RecyclerVoucherProveedor" />
+        <activity android:name=".Cliente.CarroDeCompras.ListadoItemVoucher" />
+        <activity android:name=".Adaptadores.Cliente.ReciclerItemVoucher" />
+        <activity android:name=".Cliente.CarroDeCompras.ListadoVoucher" />
+        <activity android:name=".Adaptadores.Cliente.RecyclerVoucher" />
+        <activity android:name=".Cliente.CarroDeCompras.ListadoItemCarro" />
+        <activity android:name=".Cliente.CarroDeCompras.ListadoCarroCompra" />
+        <activity android:name=".Cliente.PerfilCliente.PerfilCliente" />
+        <activity android:name=".Cliente.EvaluacionCliente.EvaluacionServicio" />
+        <activity android:name=".Cliente.CarroDeCompras.ComprobanteReservaCliente" />
+        <activity android:name=".Cliente.CarroDeCompras.ComprobanteDePagoCliente" />
+        <activity android:name=".Cliente.CarroDeCompras.PagoDelCliente" />
+        <activity android:name=".Cliente.CarroDeCompras.CarroComprasCliente" />
+        <activity android:name=".Cliente.DetalleProductoDelProveedor.SubProductoElegidoPan" />
+        <activity android:name=".Cliente.SubProductosDelProveedor.SubProductoOtrasMasasCliente" />
+        <activity android:name=".Cliente.SubProductosDelProveedor.SubProductoPastelCliente" />
+        <activity android:name=".Cliente.SubProductosDelProveedor.SubProductoMasaCliente" />
+        <activity android:name=".Cliente.SubProductosDelProveedor.SubProductoPanCliente" />
+        <activity android:name=".Cliente.ProductosDelProveedor.OtrasMasas" />
+        <activity android:name=".Cliente.ProductosDelProveedor.Amasanderias" />
+        <activity android:name=".Cliente.ProductosDelProveedor.Pastelerias" />
+        <activity android:name=".Cliente.ProductosDelProveedor.Panaderias" />
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB57B0pYVeqF3cRMoJOYbxxx2OStgGe0qQ" />
+
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".Cliente.HomeCliente" />
+        <activity
+            android:name=".Cliente.RegistroCliente.registroCliente"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Proveedor.RegistroProveedor.registroProveedor"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Proveedor.Perfil.PerfilProveedor" />
+        <activity android:name=".Proveedor.Ventas.ListaReservas" />
+        <activity android:name=".Proveedor.Ventas.ListaVentas" />
+        <activity android:name=".Proveedor.Ventas.tipoVenta" />
+        <activity android:name=".Proveedor.subProductoPastel.detalleProductoSeleccionadoPastel" />
+        <activity android:name=".Proveedor.subProductoPastel.ListaProductosPastel" />
+        <activity android:name=".Proveedor.subProductoPastel.ingresaSubProductoPastel" />
+        <activity android:name=".Proveedor.subProductoMasa.detalleProductoSeleccionadoMasa" />
+        <activity android:name=".Proveedor.subProductoMasa.ListaProductosMasa" />
+        <activity android:name=".Proveedor.subProductoMasa.ingresaSubProductoMasa" />
+        <activity android:name=".Proveedor.subProductoPan.detalleProductoSeleccionado" />
+        <activity android:name=".Proveedor.subProductoPan.ListaProductosPan" />
+        <activity android:name=".Proveedor.subProductoPan.ingresaSubProductoPan" />
+        <activity android:name=".ejemplos.subProductosDisponibles" />
+        <activity android:name=".Proveedor.opcionesSegmentoProveedor" />
+        <activity android:name=".Proveedor.Facturas.facturasProveedor" />
+        <activity
+            android:name=".Proveedor.homeProveedor"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Proveedor.loginProveedor"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Cliente.loginCliente"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ejemplos.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".opciones"
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
+            android:value="true" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+</manifest>

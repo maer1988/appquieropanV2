@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Cliente.CarroDeCompras.PagoDelCliente">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior"
+            />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+
+    <TextView
+        android:id="@+id/txtMedioPago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SELECCIONE MEDIO DE PAGO"
+        android:layout_below="@id/tolbarCliente"
+        android:gravity="center"
+        android:textColor="#4E070C"
+        android:textStyle="bold"
+        android:textSize="20sp"/>
+
+
+
+    <ImageView
+        android:id="@+id/imgGpay"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/imgReservaCliente"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_btn_carro_pago"
+        android:padding="5dp"
+        android:src="@drawable/gpay_pago" />
+
+    <ImageView
+        android:id="@+id/imgReservaCliente"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="20dp"
+        android:padding="10dp"
+        android:background="@drawable/bg_btn_carro_pago"
+        android:src="@drawable/reserva_producto" />
+    <Button
+        android:id="@+id/btncancelar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/botones_navegacion_elige_pago"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/btn_qpan_general_inicio"
+        android:text="Cancelar"
+        android:textColor="@drawable/txt_btn_general_inicio" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/botones_navegacion_elige_pago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior_cliente"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+    <TextView
+        android:id="@+id/total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        android:visibility="gone" />
+
+</RelativeLayout>

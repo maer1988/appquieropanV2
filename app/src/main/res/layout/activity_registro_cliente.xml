@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo_elige"
+    tools:context=".Cliente.RegistroCliente.registroCliente">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="10dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foregroundGravity="center_vertical"
+                android:background="@drawable/logo_principal"
+                android:layout_gravity="center_horizontal"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="15dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NUEVOS CLIENTES"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_gravity="center_horizontal"
+                android:textSize="16dp" />
+
+            <EditText
+                android:id="@+id/rMailCliente"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="30dp"
+                android:hint="@string/ingrese_e_mail"
+                android:paddingLeft="20dp"
+                android:background="@drawable/texto"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+                android:id="@+id/rNombreCliente"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:hint="Ingrese Nombre"
+                android:paddingLeft="20dp"
+                android:background="@drawable/texto"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+
+                android:id="@+id/rPassCliente"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:hint="@string/ingrese_password"
+                android:paddingLeft="20dp"
+                android:background="@drawable/texto"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+                android:id="@+id/rRePassCliente"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:hint="Repita Password"
+                android:paddingLeft="20dp"
+                android:background="@drawable/texto"
+                android:inputType="textEmailAddress" />
+
+            <Button
+                android:id="@+id/btnRegCli"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="40dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/btn_qpan_general_inicio"
+                android:text="Registrar"
+                android:textColor="@drawable/txt_btn_general_inicio" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

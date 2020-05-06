@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Cliente.ListaProveedorCliente">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+        <ImageView
+            android:id="@+id/imgSalir_cliente"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="top|right"
+            android:background="@drawable/ic_action_salir"  />
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior"
+            />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/btn_navegacionC"
+        android:layout_below="@id/tolbarCliente"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Proveedores"
+            android:gravity="left"
+            android:textStyle="bold"
+            android:textSize="30sp"/>
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/idMapaProveedores"
+            android:layout_width="match_parent"
+            android:layout_height="150dp">
+
+        </com.google.android.gms.maps.MapView>
+
+        <TextView
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Eliga su proveedor segun nota o rapidez"
+            android:gravity="left"
+            android:textSize="12sp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/idListaProveedorCliente"
+            android:layout_marginTop="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/btn_navegacionC"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior_cliente"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+</RelativeLayout>

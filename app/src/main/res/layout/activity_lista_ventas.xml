@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F7"
+    tools:context=".Proveedor.Ventas.ListaVentas">
+
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior" />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/botones_navegaVenta"
+        android:layout_below="@id/tolbarCliente"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LISTADO DE VENTAS"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="39dp"
+            android:layout_marginTop="5dp"
+            android:text="Listado de las ventas Confirmadas Y canceladas electronicamente "
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="458dp"></androidx.recyclerview.widget.RecyclerView>
+
+
+    </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/botones_navegaVenta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+</RelativeLayout>

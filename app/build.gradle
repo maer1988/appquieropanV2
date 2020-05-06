@@ -1,0 +1,55 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.example.appquieropan"
+        minSdkVersion 16    
+        targetSdkVersion 28
+        multiDexEnabled true
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+
+        checkReleaseBuilds false
+
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation 'com.google.firebase:firebase-auth:17.0.0'
+    implementation 'com.google.firebase:firebase-database:17.0.0'
+    implementation 'com.google.firebase:firebase-storage:17.0.0'
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.android.gms:play-services-ads:17.2.1'
+    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'com.google.android.gms:play-services-wallet:18.0.0'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation files('src/main/java/com/example/appquieropan/Cliente/CarroDeCompras/mailer/activation.jar')
+    implementation files('src/main/java/com/example/appquieropan/Cliente/CarroDeCompras/mailer/additionnal.jar')
+    implementation files('src/main/java/com/example/appquieropan/Cliente/CarroDeCompras/mailer/mail.jar')
+    implementation fileTree(dir: 'src\\main\\java\\com\\example\\appquieropan\\Cliente\\CarroDeCompras\\mailer', include: ['*.aar', '*.jar'], exclude: [])
+}

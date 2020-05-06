@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Cliente.CarroDeCompras.ComprobanteReservaCliente">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior"
+            />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+
+    <TextView
+        android:id="@+id/txtTituloPago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Comprobante de Reserva"
+        android:layout_below="@id/tolbarCliente"
+        android:textColor="#4E070C"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:gravity="center"/>
+
+    <TextView
+        android:id="@+id/txtsubTituloPago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Con este comprobante puede retirar su producto"
+        android:layout_below="@id/txtTituloPago"
+        android:textColor="#4E070C"
+        android:textSize="12sp"
+        android:gravity="center"/>
+
+    <ImageView
+        android:id="@+id/imgProductoPago"
+        android:layout_below="@id/txtsubTituloPago"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
+        android:layout_centerInParent="true"
+        android:background="#FF9800"
+        android:src="@drawable/logo_superior"
+        />
+
+    <TextView
+        android:id="@+id/nroTransaccion"
+        android:layout_below="@+id/imgProductoPago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Numero Reserva: "/>
+
+    <View
+        android:id="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/nroTransaccion"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+    <TextView
+        android:id="@+id/ClientePago"
+        android:layout_below="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Nombre Cliente: "/>
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/ClientePago"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+    <TextView
+        android:id="@+id/productoPago"
+        android:layout_below="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Producto(S): "/>
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/productoPago"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/divider3"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="4dp">
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+
+    <View
+        android:id="@+id/divider5"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/recyclerView"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+    <TextView
+        android:id="@+id/fechaRetiroPago"
+        android:layout_below="@+id/divider5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Fecha de retiro o entrega: "/>
+
+    <View
+        android:id="@+id/divider6"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/fechaRetiroPago"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+    <TextView
+        android:id="@+id/nombreProveedorPago"
+        android:layout_below="@+id/divider6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Direccion Proveedor: "/>
+
+    <View
+        android:id="@+id/divider7"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/nombreProveedorPago"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+
+    <TextView
+        android:id="@+id/rutClientePago"
+        android:layout_below="@+id/divider7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:text="Nombre Proveedor: "/>
+
+    <View
+        android:id="@+id/divider8"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@+id/rutClientePago"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#C8C9CB" />
+
+
+    <Button
+        android:id="@+id/btnEnviarCorreoReserva"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="5dp"
+        android:background="@drawable/btn_qpan_general_inicio"
+        android:textColor="@drawable/txt_btn_general_inicio"
+        android:layout_above="@id/botones_navegacion_comp_reserva"
+        android:text="Enviar Por Correo"/>
+
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/botones_navegacion_comp_reserva"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior_cliente"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+</RelativeLayout>

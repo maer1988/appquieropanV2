@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F7"
+    tools:context=".Proveedor.opcionesSegmentoProveedor">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior"
+            />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <FrameLayout
+        android:id="@+id/fragmento"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        android:layout_above="@id/botones_navegacion"
+        android:layout_below="@id/tolbarCliente"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:id="@+id/txtTitulo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txtTitulo"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:text="@string/segmentos"
+            android:textColor="#4E070C"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnPan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/btn_opciones_proveedor"
+            android:text="@string/panaderia"
+            android:textColor="@drawable/txt_boton_factura"
+            android:textSize="15sp"
+            android:layout_marginTop="-100dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnPasteleria"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_opciones_proveedor"
+            android:text="@string/pasteleria"
+            android:textColor="@drawable/txt_boton_factura"
+            android:textSize="15sp"
+            android:layout_marginTop="0dp"
+            android:textStyle="bold"
+            android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/btnAmansanderia"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_opciones_proveedor"
+            android:text="@string/amasanderia"
+            android:textColor="@drawable/txt_boton_factura"
+            android:textSize="15sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="90dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnOtros"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_opciones_proveedor"
+            android:text="@string/otros"
+            android:textColor="@drawable/txt_boton_factura"
+            android:textSize="15sp"
+            android:layout_gravity="center"
+            android:layout_marginTop="180dp"
+            android:textStyle="bold"/>
+
+    </FrameLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/botones_navegacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:menu="@menu/menu_inferior"
+        app:itemBackground="@color/md_brown_950"
+        app:itemTextColor="@color/md_orange_A750"
+        app:itemIconTint="@color/md_orange_A750"
+        android:background="?android:attr/windowBackground">
+
+    </com.google.android.material.bottomnavigation.BottomNavigationView>
+
+</RelativeLayout>

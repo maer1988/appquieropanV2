@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_home_cliente"
+        android:icon="@drawable/inicio_cliente"
+        android:title="Inicio"></item>
+
+    <item
+        android:id="@+id/nav_pedidos_cliente"
+        android:icon="@drawable/pedido_cliente"
+        android:title="Tu Pedido"></item>
+
+    <item
+        android:id="@+id/nav_perfil_cliente"
+        android:icon="@drawable/favorritos_cliente"
+        android:title="Favoritos"></item>
+
+
+
+    <item
+        android:id="@+id/nav_compras_cliente"
+        android:icon="@drawable/carro_compras_cliente"
+        android:title="Revisa tu pedido"></item>
+
+
+    <item
+        android:id="@+id/nav_pagos_pendientes"
+        android:icon="@drawable/pagos_cliente"
+        android:title="Pagos"></item>
+
+
+</menu>

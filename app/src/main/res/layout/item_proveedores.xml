@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/verProveedor"
+    android:layout_width="match_parent"
+    android:layout_height="160dp"
+    android:layout_margin="5dp"
+    android:background="#45000000"
+    android:elevation="15dp"
+    app:cardCornerRadius="10dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="156dp"
+        android:orientation="horizontal">
+
+        <ProgressBar
+            android:id="@+id/idProgressCliente"
+            android:layout_width="60dp"
+            android:layout_height="82dp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/imgProveedorCliente"
+            android:layout_width="60dp"
+            android:layout_height="82dp"
+            android:layout_gravity="center"
+            android:padding="10dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/txtNombreE"
+                    android:layout_width="287dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:text="Nombre empresa"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/idNotaProveedor"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:text="Nota"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/txtTipoD"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:text="Tipo de delivery"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txtTipoP"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:text="Acepta pagos online"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txtDespacho"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="10dp"
+                android:text="30 a 40 minutos + envio $300"
+                android:textSize="10sp" />
+
+            <TextView
+                android:id="@+id/txtId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnEditPanCliente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FF9F1C" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+
+</androidx.cardview.widget.CardView>

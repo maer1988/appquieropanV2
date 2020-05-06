@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo_elige"
+    tools:context=".Proveedor.RegistroProveedor.registroProveedor">
+
+    <com.google.android.material.appbar.CollapsingToolbarLayout
+        android:id="@+id/tolbarCliente"
+        android:layout_width="match_parent"
+        android:layout_height="75dp"
+        android:background="@color/md_orange_A750"
+        android:minHeight="?attr/actionBarSize"
+        android:visibility="visible">
+
+
+        <ImageView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/logo_superior" />
+
+    </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:orientation="vertical"
+        android:layout_below="@id/tolbarCliente"
+        tools:visibility="visible">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Complete todos los campos"
+            android:textColor="#FFFFFF"
+            android:textSize="16dp" />
+
+        <EditText
+            android:id="@+id/rRazonSocial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/texto"
+            android:hint="Razon Social"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="20dp" />
+
+        <EditText
+            android:id="@+id/rRutEmpresa"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/texto"
+            android:hint="Rut Empresa ejem: 12345678-9"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="20dp" />
+
+        <EditText
+            android:id="@+id/direccion"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/texto"
+            android:hint="Ingrese su direccion"
+            android:inputType="textEmailAddress"
+            android:paddingLeft="20dp" />
+
+        <Button
+            android:id="@+id/btnRegProv"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="20dp"
+            android:background="@drawable/btn_qpan_general_inicio"
+            android:text="Registrar"
+            android:textColor="@drawable/txt_btn_general_inicio" />
+    </LinearLayout>
+
+</RelativeLayout>
