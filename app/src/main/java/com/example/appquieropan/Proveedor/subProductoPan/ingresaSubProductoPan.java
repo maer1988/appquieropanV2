@@ -217,7 +217,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
                                     tipoSubProducto.setPrecio(precioPan);
                                     tipoSubProducto.setRut_Empresa(rutEmpresa);
                                     tipoSubProducto.setCategoria(tipo_cat);
-                                    tipoSubProducto.setId_producto(UUID.randomUUID().toString());
+                                    tipoSubProducto.setId_producto(tipoSubProducto.getUid());
 
 
                                     db.collection("producto").document(tipoSubProducto.getUid()).set(tipoSubProducto);

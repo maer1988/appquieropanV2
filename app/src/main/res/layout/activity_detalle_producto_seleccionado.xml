@@ -180,4 +180,28 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.923" />
 
+    <EditText
+        android:id="@+id/categoria"
+        android:layout_width="83dp"
+        android:layout_height="14dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="53dp"
+        tools:layout_editor_absoluteY="323dp"
+        tools:visibility="invisible" />
+
+    <EditText
+        android:id="@+id/rut_empresa"
+        android:layout_width="130dp"
+        android:layout_height="13dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:visibility="invisible"
+        tools:layout_editor_absoluteX="152dp"
+        tools:layout_editor_absoluteY="322dp"
+        tools:visibility="invisible" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

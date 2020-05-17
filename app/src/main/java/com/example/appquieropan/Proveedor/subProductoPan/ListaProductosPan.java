@@ -70,7 +70,6 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
         mRecyclerView = findViewById(R.id.myRecyclerP);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
-        obtieneRutEmpresa(firebaseAuth.getCurrentUser().getUid());
         CargarRecyclerView(mRecyclerView,tipo_cat);
 
         botonesNav = findViewById(R.id.botones_navegaPan);
@@ -119,31 +118,6 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
         });
     }
 
-    private void obtieneRutEmpresa(final String userP) {
-
-        db.collection("Proveedor")
-                .whereEqualTo("id_proveedor", userP)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Proveedor proveedor = document.toObject(Proveedor.class);
-
-                                rutEmpresa = proveedor.getRut_proveedor();
-                               // nombreEmpresa = proveedor.getNom_proveedor();
-                                //txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
-
-                            }
-                        } else {
-                            Log.d("TAG", "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-
-
-    }
 
     @Override
     public void onClick(View v) {
@@ -159,44 +133,69 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
         }
     }
 
-    public void CargarRecyclerView(RecyclerView recyclerView, String tipo){
+    public void CargarRecyclerView(RecyclerView recyclerView, final String tipo){
 
 
-        db.collection("producto")
-                .whereEqualTo("categoria", tipo)
-                .whereEqualTo("rut_Empresa", "1-9")
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", firebaseAuth.getCurrentUser().getUid())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                        ArrayList<Producto> arrayListTipo = new ArrayList<>();
-
-
                         if (task.isSuccessful()) {
-
-
                             for (QueryDocumentSnapshot document : task.getResult()) {
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                                Log.d("ESTO", document.getId() + " => " + document.getData());
-                                 Producto subProducto = document.toObject(Producto.class);
-                                subProducto.setNom_tipoSubProducto(subProducto.getNom_tipoSubProducto());
-                                subProducto.setDesc_tipoSubProducto(subProducto.getDesc_tipoSubProducto());
-                                subProducto.setUrlSubproducto(subProducto.getUrlSubproducto());
-                                subProducto.setUid(subProducto.getUid());
-
-                                arrayListTipo.add(subProducto);
-
+                                rutEmpresa = proveedor.getRut_proveedor();
+                                // nombreEmpresa = proveedor.getNom_proveedor();
+                                //txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
 
                             }
-                            recyclerProductosAdapter = new RecyclerProductosAdapter(getApplicationContext(), R.layout.item_ventas, arrayListTipo);
-                            mRecyclerView.setAdapter(recyclerProductosAdapter);
-
-                        }
 
 
+                            db.collection("producto")
+                                    .whereEqualTo("categoria", tipo)
+                                    .whereEqualTo("rut_Empresa", rutEmpresa)
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-				else {
+                                            ArrayList<Producto> arrayListTipo = new ArrayList<>();
+
+
+                                            if (task.isSuccessful()) {
+
+
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                                    Log.d("ESTO", document.getId() + " => " + document.getData());
+                                                    Producto subProducto = document.toObject(Producto.class);
+                                                    subProducto.setNom_tipoSubProducto(subProducto.getNom_tipoSubProducto());
+                                                    subProducto.setDesc_tipoSubProducto(subProducto.getDesc_tipoSubProducto());
+                                                    subProducto.setUrlSubproducto(subProducto.getUrlSubproducto());
+                                                    subProducto.setUid(subProducto.getUid());
+
+                                                    arrayListTipo.add(subProducto);
+
+
+                                                }
+                                                recyclerProductosAdapter = new RecyclerProductosAdapter(getApplicationContext(), R.layout.item_ventas, arrayListTipo);
+                                                mRecyclerView.setAdapter(recyclerProductosAdapter);
+
+                                            }
+
+
+
+                                            else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+                                        }
+                                    });
+
+
+
+                        } else {
                             Log.d("TAG", "Error getting documents: ", task.getException());
                         }
                     }

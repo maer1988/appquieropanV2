@@ -52,7 +52,7 @@ public class RecyclerProductosAdapter extends RecyclerView.Adapter<RecyclerProdu
     public void onBindViewHolder(@NonNull final ProductoViewHolder productoViewHolder, int i) {
 
         tipoSubProducto = arrayListProductos.get(i);
-        productoViewHolder.mID.setText(tipoSubProducto.getUid());
+        productoViewHolder.mID.setText(tipoSubProducto.getId_producto());
         productoViewHolder.mNombre.setText("Nombre: "+tipoSubProducto.getNom_tipoSubProducto());
         productoViewHolder.mPrecio.setText("Precio: "+tipoSubProducto.getPrecio());
 

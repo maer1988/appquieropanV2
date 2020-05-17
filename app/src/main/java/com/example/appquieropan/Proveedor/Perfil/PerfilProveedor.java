@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -46,6 +48,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -69,12 +74,13 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
     static final int REQUEST_IMAGE_GALLERY = 2;
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private CheckBox opcionO,opcionE, opcionL,opcionD;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private String urlGuardada, nombrePre, rutPre,correoPRe;
 
     private BottomNavigationView botonesNav;
 
-    private DatabaseReference mDatabase;
+
     StorageReference storageReference;
     private FirebaseStorage mStorage;
 
@@ -83,7 +89,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil_proveedor);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         storageReference = FirebaseStorage.getInstance().getReference();
         mStorage = FirebaseStorage.getInstance();
 
@@ -98,6 +104,9 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         imagenPerfil = findViewById(R.id.imagenPerfil);
 
         idProvee = getIntent().getStringExtra("idProveedor");
+
+        Log.d("IDPRO", "id prove => "+idProvee);
+
         final String userP = getIntent().getStringExtra("idProveedor");
 
         edtRazonSocial = findViewById(R.id.edtRazonS);
@@ -117,7 +126,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
         String id = getIntent().getStringExtra("idProveedor");
 
-        cargarDatosVistaPerfil(id);
+        cargarDatosVistaPerfil(idProvee);
 
 /*
         opcionO.setOnClickListener(this);
@@ -321,7 +330,8 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
                                 //proveedor.setTipoVentaProducto(datoRadio);
                                 proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
-                                mDatabase.child("Proveedor").child(proveedor.getId_proveedor()).setValue(proveedor);
+                                db.collection("Proveedor").document(proveedor.getId_proveedor()).set(proveedor);
+
                                 //databaseReference.child(databaseReference.push().getKey()).setValue(tipoSubProducto);
 
                                 Toast.makeText(PerfilProveedor.this,"Producto actualizado",Toast.LENGTH_SHORT).show();
@@ -422,35 +432,34 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
     private void cargarDatosVistaPerfil(final String idProveedor) {
 
-        mDatabase.child("Proveedor").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", idProveedor)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                    Proveedor proveedor = snapshot.getValue(Proveedor.class);
+                                Log.d("PROV", document.getId() + " => " + document.getData());
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                    Log.e("Datos","" + idProveedor);
+                                Log.e("Reales","" + proveedor.getNom_proveedor());
+                                cargaDatosPantalla(proveedor.getNom_proveedor(),proveedor.getRut_proveedor(),proveedor.getUrl_proveedor(),
+                                        proveedor.getDireccion_proveedor(),proveedor.getFono1_proveedor(),proveedor.getTipo_Despacho_Proveedor(),
+                                        proveedor.getTipo_Pago_Proveedor());
+                                urlGuardada = proveedor.getUrl_proveedor();
+                                nombrePre = proveedor.getNom_proveedor();
+                                correoPRe = proveedor.getEmail_proveedor();
+                                rutPre = proveedor.getRut_proveedor();
 
-                    if(idProveedor.equals(proveedor.getId_proveedor())){
-                        Log.e("Reales","" + proveedor.getNom_proveedor());
-                        cargaDatosPantalla(proveedor.getNom_proveedor(),proveedor.getRut_proveedor(),proveedor.getUrl_proveedor(),
-                                proveedor.getDireccion_proveedor(),proveedor.getFono1_proveedor(),proveedor.getTipo_Despacho_Proveedor(),
-                                proveedor.getTipo_Pago_Proveedor());
-                        urlGuardada = proveedor.getUrl_proveedor();
-                        nombrePre = proveedor.getNom_proveedor();
-                        correoPRe = proveedor.getEmail_proveedor();
-                        rutPre = proveedor.getRut_proveedor();
-
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
     }
 
@@ -531,7 +540,8 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         proveedor.setUrl_proveedor(urlGuardada);
         proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
-        mDatabase.child("Proveedor").child(proveedor.getId_proveedor()).setValue(proveedor);
+        db.collection("Proveedor").document(proveedor.getId_proveedor()).set(proveedor);
+
 
         Toast.makeText(PerfilProveedor.this,"Pefil actualizado",Toast.LENGTH_SHORT).show();
 

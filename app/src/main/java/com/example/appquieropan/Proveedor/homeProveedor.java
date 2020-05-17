@@ -57,7 +57,7 @@ public class homeProveedor extends AppCompatActivity {
         setContentView(R.layout.activity_home_proveedor);
         //inicializamos el objeto firebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
-
+         userP=firebaseAuth.getCurrentUser().getUid();
 
 //        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 //        getSupportActionBar().setCustomView(R.layout.image_superior);

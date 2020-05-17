@@ -28,8 +28,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.appquieropan.Entidad.Producto;
+import com.example.appquieropan.Proveedor.opcionesSegmentoProveedor;
 import com.example.appquieropan.Entidad.TipoSubProducto;
 import com.example.appquieropan.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -38,6 +41,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -51,12 +57,13 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
     public static final String descriProducto="descripcionP";
     public static final String precioProducto="precio-p";
     public static final String idProducto="idP";
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static final String codigoProvve="id";
     private String userP = null;
     private String rutEmpresa = null;
 
-    private EditText txtEdnombre, txtDescripcion, txtPrecio;
+    private EditText txtEdnombre, txtDescripcion, txtPrecio,rut_emp,categoria;
     private ImageView imgProducto;
     private Button btnCambiosG,btnEliminar;
     private Uri filepath;
@@ -67,8 +74,9 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
     private String datoRadio= null;
     private RadioGroup radioGroup;
     private RadioButton radio1,radio2;
+    private String id;
 
-    private DatabaseReference mDatabase;
+
     StorageReference storageReference;
     private FirebaseStorage mStorage;
 
@@ -78,13 +86,15 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalle_producto_seleccionado);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         storageReference = FirebaseStorage.getInstance().getReference();
         mStorage = FirebaseStorage.getInstance();
 
         txtEdnombre = findViewById(R.id.EdnomProductoPan);
         txtDescripcion = findViewById(R.id.EddescProdutoPan);
         txtPrecio = findViewById(R.id.EdidPrecioProductoPan);
+        categoria = findViewById(R.id.categoria);
+        rut_emp = findViewById(R.id.rut_empresa);
         imgProducto = findViewById(R.id.imgEditProductoPan);
 
         radioGroup = findViewById(R.id.radioGroupPan);
@@ -93,8 +103,10 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
         btnCambiosG = findViewById(R.id.btnEditarProductoPan);
         btnEliminar = findViewById(R.id.btnEliminarProductoPan);
-        String id = getIntent().getStringExtra("idP");
+        id = getIntent().getStringExtra("idP");
         userP = getIntent().getStringExtra("id");
+
+        Log.d("id", "ID =>>"+id);
 
         cargarDatosVistaDetalle(id);
         //obtieneRutEmpresa(userP);
@@ -108,14 +120,17 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
 
     private void guardarCambios(final Uri data, String datoRadio) {
-        String nombre,descripcion,precio;
+        String nombre,descripcion,precio,rutEmpresa,catego;
         nombre = txtEdnombre.getText().toString().trim();
         descripcion = txtDescripcion.getText().toString().trim();
         precio = txtPrecio.getText().toString().trim();
+       rutEmpresa = rut_emp.getText().toString().trim();
+       catego = categoria.getText().toString().trim();
+
 
         if(!nombre.isEmpty() && !descripcion.isEmpty() && !precio.isEmpty()){
 
-            actualizaFirebase(nombre,descripcion,precio, data, datoRadio);
+            actualizaFirebase(nombre,descripcion,precio, data, datoRadio,rutEmpresa,catego);
             //validarSiHayCambios(nombre,descripcion,precio);
 
 
@@ -126,7 +141,7 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
     }
 
-    private void actualizaFirebase(final String nombre, final String descripcion, final String precio, Uri data, final String datoRadio) {
+    private void actualizaFirebase(final String nombre, final String descripcion, final String precio, Uri data, final String datoRadio,final String rut,final String categoria) {
 
         if (!TextUtils.isEmpty(nombre) && !TextUtils.isEmpty(descripcion) && !TextUtils.isEmpty(precio)){
 
@@ -138,7 +153,7 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
                 data = Uri.parse(urlGuardada);
 
-                actualizaDatosSinImagen(nombre,descripcion,precio,data,datoRadio);
+                actualizaDatosSinImagen(nombre,descripcion,precio,data,datoRadio,rut,categoria);
 
             }else{
 
@@ -153,15 +168,19 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
                                 Uri url = uri.getResult();
                                 String urlGuardada;
                                 //objeto de tipo subproducto
-                                TipoSubProducto actTipo = new TipoSubProducto();
+                                Producto actTipo = new Producto();
                                 actTipo.setNom_tipoSubProducto(nombre);
                                 actTipo.setDesc_tipoSubProducto(descripcion);
                                 actTipo.setPrecio(precio);
                                 actTipo.setUrlSubproducto(url.toString());
                                 actTipo.setTipoVentaProducto(datoRadio);
+                                actTipo.setCategoria(categoria);
+                                actTipo.setRut_Empresa(rut);
                                 actTipo.setUid(getIntent().getStringExtra("idP"));
+                                actTipo.setId_producto(actTipo.getUid());
 
-                                mDatabase.child("SubProductoPan").child(actTipo.getUid()).setValue(actTipo);
+
+                                db.collection("producto").document(actTipo.getUid()).set(actTipo);
                                 //databaseReference.child(databaseReference.push().getKey()).setValue(tipoSubProducto);
 
                                 Toast.makeText(detalleProductoSeleccionado.this,"Producto actualizado",Toast.LENGTH_SHORT).show();
@@ -193,37 +212,37 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
     private void cargarDatosVistaDetalle(final String idProducto) {
 
-        mDatabase.child("SubProductoPan").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("producto")
+                .whereEqualTo("id_producto", idProducto)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                Log.d("TAG", document.getId() + " => " + document.getData());
+                                Producto subProducto = document.toObject(Producto.class);
+                                cargaDatosPantalla(subProducto.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(), subProducto.getPrecio(), subProducto.getUrlSubproducto(),subProducto.getRut_Empresa(),subProducto.getCategoria());
+                                urlGuardada = subProducto.getUrlSubproducto();
 
-                    TipoSubProducto subProducto = snapshot.getValue(TipoSubProducto.class);
+                            }
 
-                    Log.e("Datos","" + idProducto);
+                        }else {
+                                Log.d("FF", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
 
-                    if(idProducto.equals(subProducto.getUid())){
-                        Log.e("Reales","" + subProducto.getNom_tipoSubProducto());
-                        cargaDatosPantalla(subProducto.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
-                        urlGuardada = subProducto.getUrlSubproducto();
-                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-    }
-
-    private void cargaDatosPantalla(String sub, String des,String prec, String url) {
+    private void cargaDatosPantalla(String sub, String des,String prec, String url,String rut,String ca ) {
 
         txtEdnombre.setText(sub);
         txtDescripcion.setText(des);
         txtPrecio.setText(prec);
+        rut_emp.setText(rut);
+        categoria.setText(ca);
         //imgProducto.setTextDirection(url);
         //Toast.makeText(this, ""+url, Toast.LENGTH_SHORT).show();
 
@@ -323,8 +342,7 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
     private void limpiaCampos() {
 
-        Intent cliente = new Intent(getApplication(), ListaProductosPan.class);
-        cliente.putExtra(ListaProductosPan.codigoProvve,userP);
+        Intent cliente = new Intent(getApplication(), opcionesSegmentoProveedor.class);
         startActivity(cliente);
         finish();
 
@@ -345,9 +363,10 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
                     @Override
                     public void onSuccess(Void aVoid) {
 
-                        TipoSubProducto actTipo = new TipoSubProducto();
+                        Producto actTipo = new Producto();
                         actTipo.setUid(getIntent().getStringExtra("idP"));
-                        mDatabase.child("SubProductoPan").child(actTipo.getUid()).removeValue();
+
+                        db.collection("producto").document(actTipo.getUid()).delete();
 
                         Toast.makeText(detalleProductoSeleccionado.this,"Producto Eliminado",Toast.LENGTH_SHORT).show();
 //                progressDialog.dismiss();
@@ -373,17 +392,20 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
     }
 
-    private void actualizaDatosSinImagen(String nombre, String descripcion, String precio, Uri data, String datoRadio) {
+    private void actualizaDatosSinImagen(String nombre, String descripcion, String precio, Uri data, String datoRadio,String rut,String categoria) {
 
-        TipoSubProducto actTipo = new TipoSubProducto();
+        Producto actTipo = new Producto();
         actTipo.setNom_tipoSubProducto(nombre);
         actTipo.setDesc_tipoSubProducto(descripcion);
         actTipo.setPrecio(precio);
         actTipo.setUrlSubproducto(data.toString());
         actTipo.setTipoVentaProducto(datoRadio);
+        actTipo.setRut_Empresa(rut);
+        actTipo.setCategoria(categoria);
         actTipo.setUid(getIntent().getStringExtra("idP"));
+        actTipo.setId_producto(actTipo.getUid());
 
-        mDatabase.child("SubProductoPan").child(actTipo.getUid()).setValue(actTipo);
+        db.collection("producto").document(actTipo.getUid()).set(actTipo);
 
         Toast.makeText(detalleProductoSeleccionado.this,"Producto actualizado",Toast.LENGTH_SHORT).show();
         limpiaCampos();
