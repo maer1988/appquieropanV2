@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.appquieropan.Cliente.DetalleProductoDelProveedor.SubProductoElegidoPan;
+import com.example.appquieropan.Entidad.Producto;
 import com.example.appquieropan.Entidad.TipoSubProducto;
 import com.example.appquieropan.R;
 
@@ -29,10 +30,10 @@ public class RecyclerProveedorPanSel extends RecyclerView.Adapter<RecyclerProvee
 
     private Context mCcontext;
     private int layoutResource;
-    private ArrayList<TipoSubProducto> arrayListProductos;
-    TipoSubProducto tipoSubProducto;
+    private ArrayList<Producto> arrayListProductos;
+    Producto tipoSubProducto;
 
-    public RecyclerProveedorPanSel(Context context, int layoutResource, ArrayList<TipoSubProducto> arrayListProductos) {
+    public RecyclerProveedorPanSel(Context context, int layoutResource, ArrayList<Producto> arrayListProductos) {
         this.mCcontext = context;
         this.layoutResource = layoutResource;
         this.arrayListProductos = arrayListProductos;
@@ -51,7 +52,7 @@ public class RecyclerProveedorPanSel extends RecyclerView.Adapter<RecyclerProvee
     public void onBindViewHolder(@NonNull final RecyclerProveedorPanSel.ProductoViewHolder productoViewHolder, int i) {
 
         tipoSubProducto = arrayListProductos.get(i);
-        productoViewHolder.mID.setText(tipoSubProducto.getUid());
+        productoViewHolder.mID.setText(tipoSubProducto.getId_producto());
         productoViewHolder.mNombre.setText(tipoSubProducto.getNom_tipoSubProducto());
         //productoViewHolder.mPrecio.setText("Precio: "+tipoSubProducto.getPrecio());
 
@@ -118,7 +119,7 @@ public class RecyclerProveedorPanSel extends RecyclerView.Adapter<RecyclerProvee
                     Intent intent = new Intent(mCcontext, SubProductoElegidoPan.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra(SubProductoElegidoPan.idSubproducto,mID.getText().toString());
-                    intent.putExtra(SubProductoElegidoPan.Tabla,"SubProductoPan");
+
                     /*
                     //Toast.makeText(mCcontext, "valores : "+imagenProducto, Toast.LENGTH_SHORT).show();
                     intent.putExtra(detalleProductoSeleccionado.nombreProducto,mNombre.getText().toString());

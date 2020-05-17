@@ -5,9 +5,12 @@ import androidx.annotation.NonNull;
 
 import com.example.appquieropan.Cliente.CarroDeCompras.ListadoItemCarro;
 import com.example.appquieropan.Proveedor.evalucion.Evaluacion_proveedor;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +28,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -35,16 +41,17 @@ public class cerrar_voucher extends AppCompatActivity implements View.OnClickLis
     public static  String totalvoucher="";
     private TextView id1,id2,id3,id4,id5;
     private Button cerrar,cancelar;
-    private DatabaseReference mDatabase;
+
     ArrayList<Voucher> voucher_list = new ArrayList<Voucher>();
     private BottomNavigationView botonesNav;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cerrar_voucher);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -126,49 +133,42 @@ public class cerrar_voucher extends AppCompatActivity implements View.OnClickLis
 
     public void cerrar(String id){
 
+        final String[] idDocumento = new String[1];
+
+        db.collection("Voucher")
+                .whereEqualTo("idvoucher", Idvoucher)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                Voucher v = document.toObject(Voucher.class);
+                                idDocumento[0] =document.getId();
+                                voucher_list.add(v);
+
+                            }
+
+                            voucher_list.get(0).setEstado("entregado");
+                            db.collection("Voucher").document(idDocumento[0]).set(voucher_list.get(0));
+                            Toast t = Toast.makeText(cerrar_voucher.this, "La operacion ha sido cerrada exitosamente!!!!", Toast.LENGTH_LONG);
+
+                            t.show();
+                            Intent evaluar = new Intent(cerrar_voucher.this, Evaluacion_proveedor.class);
+                            evaluar.putExtra(Evaluacion_proveedor.Voucher, Idvoucher);
+                            evaluar.putExtra(Evaluacion_proveedor.nombreproveedor, voucher_list.get(0).getNombreproveedor());
+                            evaluar.putExtra(Evaluacion_proveedor.rutproveedor, voucher_list.get(0).getRUTproveedor());
+                            evaluar.putExtra(Evaluacion_proveedor.txtcliente, voucher_list.get(0).getIDcliente());
+                            startActivity( evaluar);
+                            finish();
 
 
-
-        mDatabase.child("Voucher").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot Voucher_snapshot : dataSnapshot.getChildren()){
-
-                    Voucher v = Voucher_snapshot.getValue(Voucher.class);
-
-                    if(v.getIDVoucher().equals(Idvoucher)){
-
-                        voucher_list.add(v);
-
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-                voucher_list.get(0).setEstado("entregado");
-
-                mDatabase.child("Voucher").child(voucher_list.get(0).getIDVoucher()).setValue(voucher_list.get(0));
-
-
-
-                Toast t = Toast.makeText(cerrar_voucher.this, "La operacion ha sido cerrada exitosamente!!!!", Toast.LENGTH_LONG);
-                t.show();
-                Intent evaluar = new Intent(cerrar_voucher.this, Evaluacion_proveedor.class);
-                evaluar.putExtra(Evaluacion_proveedor.Voucher, Idvoucher);
-                evaluar.putExtra(Evaluacion_proveedor.nombreproveedor, voucher_list.get(0).getNombreproveedor());
-                evaluar.putExtra(Evaluacion_proveedor.rutproveedor, voucher_list.get(0).getRUTproveedor());
-                evaluar.putExtra(Evaluacion_proveedor.txtcliente, voucher_list.get(0).getIDcliente());
-                startActivity( evaluar);
-                finish();
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
     }
 

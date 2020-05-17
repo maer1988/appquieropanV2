@@ -92,7 +92,7 @@ public class ingresaSubProductoMasa extends AppCompatActivity implements View.On
 
                     Proveedor proveedor = snapshot.getValue(Proveedor.class);
 
-                    if(userP.equals(proveedor.getUid())){
+                    if(userP.equals(proveedor.getId_proveedor())){
                         //cargaDatosPantalla(proveedor.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
                         rutEmpresa = proveedor.getRut_proveedor();
                         Toast.makeText(ingresaSubProductoMasa.this, rutEmpresa, Toast.LENGTH_SHORT).show();

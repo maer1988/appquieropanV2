@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.appquieropan.Entidad.Producto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,6 +38,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -47,6 +54,7 @@ public class SubProductoPanCliente extends AppCompatActivity {
   StorageReference storageReference;
   private FirebaseStorage mStorage;
   RecyclerView mRecyclerView;
+  FirebaseFirestore db = FirebaseFirestore.getInstance();
 
   private TextView nombreProveedorPan;
 
@@ -76,6 +84,12 @@ public class SubProductoPanCliente extends AppCompatActivity {
     mRecyclerView = findViewById(R.id.myPanProdCliProv);
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     mRecyclerView.setLayoutManager(layoutManager);
+
+    Toast toast1 =
+            Toast.makeText(getApplicationContext(),
+                    "act. SubProductoPanCliente", Toast.LENGTH_SHORT);
+
+    toast1.show();
 
 
     botonesNav = findViewById(R.id.botones_navegacion_sub_pan);
@@ -124,29 +138,22 @@ public class SubProductoPanCliente extends AppCompatActivity {
 
   private void cargaDatosProveedorElegido(final String idProveedor) {
 
-    mDatabase.child("Proveedor").addValueEventListener(new ValueEventListener() {
-      @Override
-      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-        for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-
-          Proveedor proveedor = snapshot.getValue(Proveedor.class);
-
-          Log.e("Datos","" + idProveedor);
-
-          if(idProveedor.equals(proveedor.getRut_proveedor())){
-            Log.e("Reales","" + proveedor.getNom_proveedor());
-            cargaImagenProveedor(proveedor.getUrl_proveedor(),idProveedor, proveedor.getNom_proveedor());
-          }
-        }
-      }
-
-      @Override
-      public void onCancelled(@NonNull DatabaseError databaseError) {
-
-      }
-    });
-
+    db.collection("Proveedor")
+            .whereEqualTo("rut_proveedor", idProveedor)
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+              @Override
+              public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                  for (QueryDocumentSnapshot document : task.getResult()) {
+                    final Proveedor p = document.toObject(Proveedor.class);
+                    cargaImagenProveedor(p.getUrl_proveedor(), idProveedor, p.getNom_proveedor());
+                  }
+                } else {
+                  Log.d("tag", "Error getting documents: ", task.getException());
+                }
+              }
+            });
   }
 
   private void cargaImagenProveedor(String url, String rutProveedor, String nombreP) {
@@ -182,41 +189,39 @@ public class SubProductoPanCliente extends AppCompatActivity {
 
   private void cargaSubProductosDelProveedor(final String rutProveedor) {
 
-    mDatabase.child("SubProductoPan").addListenerForSingleValueEvent(new ValueEventListener() {
-      @Override
-      public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-        ArrayList<TipoSubProducto> arrayListTipo = new ArrayList<>();
+    db.collection("producto")
+            .whereEqualTo("rut_Empresa", rutProveedor)
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+              @Override
+              public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                ArrayList<Producto> arrayListTipo = new ArrayList<>();
 
-        for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                if (task.isSuccessful()) {
+                  for (QueryDocumentSnapshot document : task.getResult()) {
+                    Log.d("tag", document.getId() + " => " + document.getData());
 
-          TipoSubProducto pasteles = snapshot.getValue(TipoSubProducto.class);
+                    final Producto prod = document.toObject(Producto.class);
 
-          Log.e("Datos","" + rutProveedor);
+                    prod.setNom_tipoSubProducto(prod.getNom_tipoSubProducto());
+                    prod.setDesc_tipoSubProducto(prod.getDesc_tipoSubProducto());
+                    prod.setUrlSubproducto(prod.getUrlSubproducto());
+                    prod.setUid(prod.getUid());
+                    arrayListTipo.add(prod);
 
-          if(rutProveedor.equals(pasteles.getRut_Empresa())){
+                  }
+                  recyclerProductosAdapter = new RecyclerProveedorPanSel(getApplicationContext(),R.layout.item_subproductos,arrayListTipo);
+                  mRecyclerView.setAdapter(recyclerProductosAdapter);
+                }
 
-            //  Toast.makeText(SubProductoPanCliente.this, "Carga exitosa", Toast.LENGTH_SHORT).show();
-            //cargaImagenProveedor(TipoSubProducto pastel);
 
-            pasteles.setNom_tipoSubProducto(pasteles.getNom_tipoSubProducto());
-            pasteles.setDesc_tipoSubProducto(pasteles.getDesc_tipoSubProducto());
-            pasteles.setUrlSubproducto(pasteles.getUrlSubproducto());
-            pasteles.setUid(pasteles.getUid());
-            arrayListTipo.add(pasteles);
 
-          }
-        }
-
-        recyclerProductosAdapter = new RecyclerProveedorPanSel(getApplicationContext(),R.layout.item_subproductos,arrayListTipo);
-        mRecyclerView.setAdapter(recyclerProductosAdapter);
-      }
-
-      @Override
-      public void onCancelled(@NonNull DatabaseError databaseError) {
-
-      }
-    });
+				else {
+                  Log.d("tag", "Error getting documents: ", task.getException());
+                }
+              }
+            });
 
   }
 }

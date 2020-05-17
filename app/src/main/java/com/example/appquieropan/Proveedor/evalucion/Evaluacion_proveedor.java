@@ -147,7 +147,6 @@ public  void evaluar(Valoracion pv){
     Toast t = Toast.makeText(Evaluacion_proveedor.this, "Gracias por tu tiempo!!", Toast.LENGTH_LONG);
     t.show();
     Intent Home = new Intent(Evaluacion_proveedor.this,homeProveedor.class);
-    Home.putExtra(homeProveedor.codigoProvve,voucher_list.get(0).getIDproveedor());
     startActivity( Home);
 
 

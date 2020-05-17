@@ -118,7 +118,6 @@ public class RecyclerProveedorOtrasMasasSel extends RecyclerView.Adapter<Recycle
                     Intent intent = new Intent(mCcontext, SubProductoElegidoPan.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.putExtra(SubProductoElegidoPan.idSubproducto,mID.getText().toString());
-                    intent.putExtra(SubProductoElegidoPan.Tabla,"SubProductoOtraMasa");
                     mCcontext.startActivity(intent);
 
                     break;

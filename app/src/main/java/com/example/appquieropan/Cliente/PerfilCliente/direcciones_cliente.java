@@ -3,6 +3,8 @@ package com.example.appquieropan.Cliente.PerfilCliente;
 import android.os.Bundle;
 
 import com.example.appquieropan.Entidad.Cliente_direccion;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -29,6 +31,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +46,9 @@ public class direcciones_cliente extends AppCompatActivity{
 
         EditText direccion,comuna,ciudad,id,uid;
         ListView listV_personas;
-
-        FirebaseDatabase firebaseDatabase;
-        DatabaseReference databaseReference;
         private FirebaseAuth firebaseAuth;
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
         Cliente_direccion personaSelected;
 
@@ -60,10 +64,9 @@ public class direcciones_cliente extends AppCompatActivity{
 
             firebaseAuth = FirebaseAuth.getInstance();
             listV_personas = findViewById(R.id.lv_datosPersonas);
-            inicializarFirebase();
             listarDatos();
 
-            listV_personas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    listV_personas.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     personaSelected = (Cliente_direccion) parent.getItemAtPosition(position);
@@ -78,34 +81,31 @@ public class direcciones_cliente extends AppCompatActivity{
 
         private void listarDatos() {
 
-            databaseReference.child("Cliente_direccion").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    listPerson.clear();
-                    for (DataSnapshot objSnaptshot : dataSnapshot.getChildren()) {
-                        Cliente_direccion p = objSnaptshot.getValue(Cliente_direccion.class);
-                       // if (p.getUid().equals(firebaseAuth.getCurrentUser().getUid())){
-                        listPerson.add(p);
-                        Log.d("cliente_dire","uid: "+p.getUid());
-                    //}
-                        arrayAdapterPersona = new ArrayAdapter<Cliente_direccion>(direcciones_cliente.this, android.R.layout.simple_list_item_1, listPerson);
-                        listV_personas.setAdapter(arrayAdapterPersona);
-                    }
-                }
+            db.collection("Cliente_direccion")
+                    .whereEqualTo("id_cliente", firebaseAuth.getCurrentUser().getUid())
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                            listPerson.clear();
+                            if (task.isSuccessful()) {
 
-                }
-            });
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    Cliente_direccion p = document.toObject(Cliente_direccion.class);
+                                    listPerson.add(p);
+                                    arrayAdapterPersona = new ArrayAdapter<Cliente_direccion>(direcciones_cliente.this, android.R.layout.simple_list_item_1, listPerson);
+                                    listV_personas.setAdapter(arrayAdapterPersona);
+                                }
+                            } else {
+                                Log.d("TAG", "Error getting documents: ", task.getException());
+                            }
+                        }
+                    });
+
         }
 
-        private void inicializarFirebase() {
-            FirebaseApp.initializeApp(this);
-            firebaseDatabase = FirebaseDatabase.getInstance();
-            //firebaseDatabase.setPersistenceEnabled(true);
-            databaseReference = firebaseDatabase.getReference();
-        }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,7 +135,8 @@ public class direcciones_cliente extends AppCompatActivity{
                         p.setCiudad(ciu);
                         p.setUid(firebaseAuth.getCurrentUser().getUid());
 
-                        databaseReference.child("Cliente_direccion").child(p.getId()).setValue(p);
+
+                        db.collection("Cliente_direccion").document(p.getId()).set(p);
                         Toast.makeText(this, "Agregado", Toast.LENGTH_LONG).show();
                         limpiarCajas();
                     }
@@ -148,7 +149,7 @@ public class direcciones_cliente extends AppCompatActivity{
                     p.setComuna(comuna.getText().toString().trim());
                     p.setCiudad(ciudad.getText().toString().trim());
                     p.setUid(firebaseAuth.getCurrentUser().getUid());
-                    databaseReference.child("Cliente_direccion").child(p.getId()).setValue(p);
+                    db.collection("Cliente_direccion").document().set(p);
                     Toast.makeText(this,"Actualizado", Toast.LENGTH_LONG).show();
                     limpiarCajas();
                     break;
@@ -156,7 +157,7 @@ public class direcciones_cliente extends AppCompatActivity{
                 case R.id.icon_delete:{
                     Cliente_direccion p = new Cliente_direccion();
                     p.setId(personaSelected.getId());
-                    databaseReference.child("Cliente_direccion").child(p.getId()).removeValue();
+                    db.collection("Cliente_direccion").document(p.getId()).delete();
                     Toast.makeText(this,"Eliminado", Toast.LENGTH_LONG).show();
                     limpiarCajas();
                     break;

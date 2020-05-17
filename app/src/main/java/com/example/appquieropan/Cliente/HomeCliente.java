@@ -15,6 +15,8 @@ import com.example.appquieropan.Adaptadores.Cliente.CustomInfoWindowAdapter;
 import com.example.appquieropan.Cliente.CarroDeCompras.ComprobanteReservaCliente;
 import com.example.appquieropan.Cliente.CarroDeCompras.ListadoItemVoucher;
 import com.example.appquieropan.Entidad.Valoracion;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -57,10 +59,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-
-//linea comentada
 
 public class HomeCliente extends AppCompatActivity implements View.OnClickListener, OnMapReadyCallback , GoogleMap.OnMarkerClickListener {
 
@@ -81,6 +84,7 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
     ArrayList<Proveedor> listproveedor = new ArrayList<Proveedor>();
     public static final int REQUEST_ACCESS_FINE;
     public ArrayList<ArrayList<String>> title = new ArrayList();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     static {
         REQUEST_ACCESS_FINE = 0;
@@ -152,7 +156,7 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
                     startActivity(intent);
                     finish();
                 }
-               else if(menuItem.getItemId()==R.id.nav_perfil_cliente) {
+                else if(menuItem.getItemId()==R.id.nav_perfil_cliente) {
                     Intent intent = new Intent(HomeCliente.this, PerfilCliente.class);
                     startActivity(intent);
                     finish();
@@ -249,18 +253,22 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
 
             case R.id.btnPanCliente:
                 Intent listaPan = new Intent(this, Panaderias.class);
+                listaPan.putExtra(Panaderias.categoria,"panaderia");
                 startActivity(listaPan);
                 break;
             case R.id.btnPastelCliente:
-                Intent listPastel = new Intent(this, Pastelerias.class);
+                Intent listPastel = new Intent(this, Panaderias.class);
+                listPastel.putExtra(Panaderias.categoria,"pasteleria");
                 startActivity(listPastel);
                 break;
             case R.id.btnAmasaCliente:
-                Intent listaMasa = new Intent(this, Amasanderias.class);
+                Intent listaMasa = new Intent(this, Panaderias.class);
+                listaMasa.putExtra(Panaderias.categoria,"masas");
                 startActivity(listaMasa);
                 break;
             case R.id.btnOtrasMasasCliente:
-                Intent listaOtrasMasas = new Intent(this, OtrasMasas.class);
+                Intent listaOtrasMasas = new Intent(this, Panaderias.class);
+                listaOtrasMasas.putExtra(Panaderias.categoria,"otras masas");
                 startActivity(listaOtrasMasas);
                 break;
         }
@@ -292,52 +300,32 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
 
     */
     public void listarproveedor(){
+        db.collection("Proveedor")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
+                         Proveedor p = document.toObject(Proveedor.class);
+                         listproveedor.add(p);
 
-        databaseReference.child("Proveedor").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+                            }
 
+                            if (loc != null) {
 
-                for(DataSnapshot objSnatshot: dataSnapshot.getChildren() ){
+                                HomeCliente.this.proveedores(new LatLng(loc.getLatitude(), loc.getLongitude()), listproveedor);
+                            }
+                            else{
 
-                    Proveedor p = objSnatshot.getValue(Proveedor.class);
-
-                    Log.d("prov",""+p.getNom_proveedor());
-
-                    listproveedor.add(p);
-
-
-
-
-                }
-
-                Log.d("LOCATION",""+loc);
-
-
-                if (loc != null) {
-
-                    HomeCliente.this.proveedores(new LatLng(loc.getLatitude(), loc.getLongitude()), listproveedor);
-                }
-
-                else{
-
-                    HomeCliente.this.proveedores(new LatLng(-33.4379352, -70.6503999), listproveedor);
-
-                }
-
-            }
-
-
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.w("Failed to read value.", databaseError.toException());
-
-            }
-        });
-
-
+                                HomeCliente.this.proveedores(new LatLng(-33.4379352, -70.6503999), listproveedor);
+                            }
+                        } else {
+                            Log.w("Failed01", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
     }
 
     private void signOut() {
@@ -350,33 +338,24 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
     }
 
     public void nombrecliente(){
+        db.collection("Cliente")
+                .whereEqualTo("id_cliente", firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-        databaseReference.child("Cliente").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                               Cliente c = document.toObject(Cliente.class);
+                                txtCliente.setText("¡Bienvenido " + c.getNom_cliente() + "!");
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-
-                    Cliente cliente = snapshot.getValue(Cliente.class);
-
-                    String uid= firebaseAuth.getCurrentUser().getUid();
-
-                    if(uid.equals(cliente.getId_cliente())){
-                        String nombre_usuario = cliente.getNom_cliente();
-                        Log.d("Nom", "nombre ususario->>"+nombre_usuario);
-                        txtCliente.setText("¡Bienvenido " + nombre_usuario + "!");
-
+                            }
+                        } else {
+                            Log.d("FAILED02", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
+                });
 
     }
 
@@ -470,32 +449,15 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
 
     public void proveedores(LatLng pos, ArrayList<Proveedor> proveedor) {
 
-
-        /**aca obtengo el arreglo de datos con las coordenadas y rut del proveedor*/
-
-
-        for(int r=0;r< proveedor.size();r++){
-            Log.d("TAG", "nom: "+proveedor.get(r).getNom_proveedor() + " / ");
-            Log.d("TAG", "rut: "+proveedor.get(r).getRut_proveedor() + " / ");
-            Log.d("TAG", "lat: "+proveedor.get(r).getLatitud() + " / ");
-            Log.d("TAG", "long: "+proveedor.get(r).getLongitud()+ " / ");
-            Log.d("TAG", "long:------------------------- " );
-
-        }
-
-
         /**aca obtengo la posicion del cliente*/
         double C_lat = pos.latitude;
         double C_lng = pos.longitude;
-
-        Log.d("pos_cli", ""+C_lat+"  "+C_lng );
 
         if (proveedor.size() > 0)
             for (int j = 0; j < proveedor.size(); j++) {
 
                 final String rut=proveedor.get(j).getRut_proveedor();
                 final String nombre_pro=proveedor.get(j).getNom_proveedor();
-
                 double P_lat = Double.parseDouble(proveedor.get(j).getLatitud());
                 double P_lng = Double.parseDouble(proveedor.get(j).getLongitud());
 
@@ -508,178 +470,64 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
                     final LatLng pos_provedoor = new LatLng(P_lat, P_lng);
                     // Log.d("pos", "pos_proveedor: " + pos_provedoor + " / ");
 
-
-                    databaseReference.child("Pan_Proveedor").orderByChild("rut_empresa").equalTo(rut).addListenerForSingleValueEvent(new ValueEventListener() {
-
-
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot datapan) {
-
-                            final String[] pan = new String[1];
-                            final String[] pastel = new String[1];
-                            final String[] masa= new String[1];
-                            final String[] otramasa= new String[1];
-
-
-                            if(datapan.exists() == true){
-
-
-                                Log.d("pan","entro rut"+rut);
-                                pan[0] ="panaderia";
-
-
-                            }
-                            else {
-                                pan[0] ="& ";
-
-                            }
-
-
-
-
-
-                            databaseReference.child("Pastel_Proveedor").orderByChild("rut_empresa").equalTo(rut).addListenerForSingleValueEvent(new ValueEventListener() {
+                    db.collection("proveedor_categoria")
+                            .whereEqualTo("rut_proveedor", rut)
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                                 @Override
-                                public void onDataChange(@NonNull DataSnapshot datapastel) {
+                                public void onComplete(@NonNull final Task<QuerySnapshot> task) {
+                                    if (task.isSuccessful()) {
 
+                                        final ArrayList<String> ArrayCategorias = new ArrayList<String>();
 
-                                    if(datapastel.exists()==true){
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
 
-                                        Log.d("pastel","entro rut"+rut);
+                                            Log.d("ZXC","categoria=>"+document.get("categoria"));
+                                            ArrayCategorias.add((String) document.get("categoria"));
 
-                                        pastel[0] ="&Pasteleria";
+                                        }
+                                        final double[] valor = {0.0};
+                                        final int[] registro = {0};
+                                        final double[] valoracion = {0};
 
+                                        db.collection("Valoracion")
+                                                .whereEqualTo("rut_valorado", rut)
+                                                .get()
+                                                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<QuerySnapshot> task2) {
+                                                        if (task.isSuccessful()) {
 
-                                    }
-
-
-                                    else {
-
-                                        pastel[0] ="& ";
-
-                                    }
-
-
-                                    databaseReference.child("OtrasMasas_Proveedor").orderByChild("rut_empresa").equalTo(rut).addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataOtramasa) {
-
-
-                                            if(dataOtramasa.exists()==true){
-
-                                                otramasa[0]="&Otras masas";
-                                                Log.d("otras_masas","entro rut"+rut);
-                                            }
-                                            else{
-
-                                                otramasa[0]="& ";
-                                            }
-
-                                            databaseReference.child("Masa_Proveedor").orderByChild("rut_empresa").equalTo(rut).addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot datamasa) {
-
-                                                    if(datamasa.exists()==true){
-                                                        masa[0]="&Masas";
-                                                        Log.d("masas","entro rut"+rut);
-                                                    }
-                                                    else{
-                                                        masa[0]="& ";
-                                                    }
-
-
-
-                                                    final double[] valor = {0.0};
-                                                    final int[] registro = {0};
-                                                    final double[] valoracion = {0};
-
-                                                    databaseReference= FirebaseDatabase.getInstance().getReference("Valoracion");
-                                                   databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                        @Override
-                                                        public void onDataChange(@NonNull DataSnapshot datavaloracion) {
-
-                                                            for(DataSnapshot pvsnapshot: datavaloracion.getChildren()) {
-
-                                                                Valoracion pv = pvsnapshot.getValue(Valoracion.class);
-
-
-                                                                if (pv.getRut_valorado().equals(rut)) {
-
-
-                                                                    valor[0] = valor[0] + Double.parseDouble(pv.getValoracion());
-                                                                    registro[0] = registro[0] + 1;
-
-
-
-                                                                }
-
+                                                            for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                              Valoracion pv = document2.toObject(Valoracion.class);
+                                                                valor[0] = valor[0] + Double.parseDouble(pv.getValoracion());
+                                                                registro[0] = registro[0] + 1;
                                                                 if (registro[0] == 0) {
 
                                                                     registro[0] = 1;
                                                                 }
 
                                                                 valoracion[0] = valor[0] / registro[0];
-                                                                Log.d("QQQ", "" + valoracion[0]);
-
 
                                                             }
 
-                                                            create_market(nombre_pro,pan[0]+pastel[0]+masa[0]+otramasa[0],pos_provedoor,rut,valoracion[0]);
+                                                            create_market(nombre_pro,ArrayCategorias,pos_provedoor,rut,valoracion[0]);
+
+                                                        } else {
+                                                            Log.d("FAILED03", "Error getting documents: ", task.getException());
                                                         }
+                                                    }
+                                                });
 
-                                                        @Override
-                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                        }
-                                                    });
-
-
-
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                }
-                                            });
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
-
-
+                                    } else {
+                                        Log.d("FAILED04", "Error getting documents: ", task.getException());
+                                    }
                                 }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-
-
                             });
-
-
-
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-
-
-
 
                 }
 
             }
-
 
     }
 
@@ -691,104 +539,78 @@ public class HomeCliente extends AppCompatActivity implements View.OnClickListen
     public boolean onMarkerClick(Marker marker) {
 
 
-            Intent intent = new Intent(this, SubProductoPanCliente.class);
-            intent.putExtra(SubProductoPanCliente.rutE,marker.getTag().toString());
-            startActivity(intent);
+        Intent intent = new Intent(this, SubProductoPanCliente.class);
+        intent.putExtra(SubProductoPanCliente.rutE,marker.getTag().toString());
+        startActivity(intent);
         return false;
     }
 
     public void ConsultaEvalucion(){
 
+        db.collection("Voucher")
+                .whereEqualTo("idcliente", firebaseAuth.getCurrentUser().getUid())
+                .whereEqualTo("estado", "entregado")
+                .whereEqualTo("valorado", "0")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            if (task.getResult().isEmpty()){
+                                Log.d("Valoracion:","no hay pendientes");
 
-        databaseReference.child("Voucher").orderByChild("idcliente").equalTo(firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            }
+                            else{
 
-                for (DataSnapshot Voucher_snapshot : dataSnapshot.getChildren()){
-
-                    Voucher v = Voucher_snapshot.getValue(Voucher.class);
-
-                    if(v.getEstado().equals("entregado") && v.getValorado().equals("0")){
-                        Log.d("LOG","Entro");
-                        Intent Evaluacion = new Intent(HomeCliente.this,EvaluacionServicio.class);
-                        Evaluacion.putExtra(EvaluacionServicio.Voucher,v.getIDVoucher());
-                        Evaluacion.putExtra(EvaluacionServicio.rutproveedor,v.getRUTproveedor());
-                        Evaluacion.putExtra(EvaluacionServicio.nombreproveedor,v.getNombreproveedor());
-                        Evaluacion.putExtra(EvaluacionServicio.txtcliente,txtCliente.getText());
-                        startActivity(Evaluacion);
-
-
-
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Voucher v = document.toObject(Voucher.class);
+                                Intent Evaluacion = new Intent(HomeCliente.this, EvaluacionServicio.class);
+                                Evaluacion.putExtra(EvaluacionServicio.Voucher, v.getIDVoucher());
+                                Evaluacion.putExtra(EvaluacionServicio.rutproveedor, v.getRUTproveedor());
+                                Evaluacion.putExtra(EvaluacionServicio.nombreproveedor, v.getNombreproveedor());
+                                Evaluacion.putExtra(EvaluacionServicio.txtcliente, txtCliente.getText());
+                                startActivity(Evaluacion);
+                            }
+                                }
+                        } else {
+                            Log.d("FAILED05", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                    else {
-                        Log.d("LOG","NO Entro");
-
-
-                    }
-
-                }
-
-
-
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
+                });
 
     }
 
-    public void create_market(String name,String Arrtitulo, LatLng pos_provedoor,String rut,double valoracion){
+    public void create_market(String name,ArrayList<String> categoria, LatLng pos_provedoor,String rut,double valoracion){
 
 
         String valor= String.valueOf(valoracion);
-
-        String[] info = Arrtitulo.split("&");
         markert=  map.addMarker(new MarkerOptions().position(pos_provedoor));
         markert.setTag(rut);
 
-        Log.d("arreglo",""+Arrtitulo);
-        Log.d("split","_0"+info[0]+"_1"+info[1]+"_2"+info[2]+"_3"+info[3]);
 
-
-        if(info[0].equals("panaderia") && info[1].equals(" ") && info[2].equals(" ") && info[3].equals(" "))
+        if(categoria.size() == 1 && categoria.contains("panaderia"))
         {
-                markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich2));
+            markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich2));
 
         }
 
-         if (info[0].equals("panaderia") && info[1].equals("Pasteleria") && info[2].equals(" ") && info[3].equals(" ")) {
+        if (categoria.size() == 2 && categoria.contains("panaderia") && categoria.contains("pasteleria")) {
 
-             markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.panaderia_pasteleria));
+            markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.panaderia_pasteleria));
         }
-             if (info[0].equals("panaderia") && info[1].equals("Pasteleria") && info[2].equals("Masas")) {
+        if (categoria.size() == 3 && categoria.contains("panaderia") && categoria.contains("pasteleria") && categoria.contains("masas")) {
 
-                markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.panaderia_pasteleria_masas));
+            markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.panaderia_pasteleria_masas));
         }
-                 if(info[0].equals(" ") && info[1].equals("Pasteleria") && info[2].equals(" ") && info[3].equals(" ") ) {
+        if(categoria.size() == 1 && categoria.contains("pasteleria")) {
 
-                markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich4));
+            markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich4));
         }
-                  if (info[0].equals(" ") && info[1].equals(" ") && info[2].equals("Masas") && info[3].equals(" ") )
+        if (categoria.size() == 1 && categoria.contains("masas"))
         {
 
             markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich3));
         }
-                     if (info[0].equals("panaderia") && info[1].equals(" ") && info[2].equals(" ") && info[3].equals(" ") )
-        {
-
-                     markert.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.sandwich2));
-        }
-
-
 
         Log.d("MArket_ti",""+markert.getTitle());
 

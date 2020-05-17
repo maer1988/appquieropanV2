@@ -2,6 +2,9 @@ package com.example.appquieropan.Proveedor.Ventas;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +27,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -31,10 +37,9 @@ import java.util.ArrayList;
 public class ListadoItemVoucher_Proveedor extends AppCompatActivity {
 
     private ReciclerItemVoucher_Proveedor reciclerItemVoucher_Proveedor;
-    private DatabaseReference mDatabase;
     public  static String value="";
     ArrayList<Producto_Detalle> list_pd = new ArrayList<>();
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     RecyclerView mRecyclerView;
 
@@ -53,7 +58,7 @@ public class ListadoItemVoucher_Proveedor extends AppCompatActivity {
 
         }
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         mRecyclerView = findViewById(R.id.recyclerView);
 
         final String userP = getIntent().getStringExtra("id");
@@ -113,43 +118,27 @@ public class ListadoItemVoucher_Proveedor extends AppCompatActivity {
 
     public void CargarRecyclerView(final RecyclerView recyclerView){
 
+        db.collection("Producto_Detalle")
+                .whereEqualTo("idvoucher", value)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Producto_Detalle pd = document.toObject(Producto_Detalle.class);
+                                list_pd.add(pd);
 
+                            }
 
+                            reciclerItemVoucher_Proveedor = new ReciclerItemVoucher_Proveedor(list_pd);
+                            recyclerView.setAdapter(reciclerItemVoucher_Proveedor);
 
-        mDatabase.child("Producto_Detalle").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot objSnatshot: dataSnapshot.getChildren() ){
-
-                    Log.d("ValueXXX",""+value);
-                    Producto_Detalle pd = objSnatshot.getValue(Producto_Detalle.class);
-
-                    if(pd.getIDvoucher().equals(value)) {
-
-                        list_pd.add(pd);
-
-                        Log.d("PPPPPP",""+list_pd.get(0).getNombre_producto());
-
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-
-                reciclerItemVoucher_Proveedor = new ReciclerItemVoucher_Proveedor(list_pd);
-
-
-                recyclerView.setAdapter(reciclerItemVoucher_Proveedor);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
 
     }

@@ -2,9 +2,13 @@ package com.example.appquieropan.Cliente.EvaluacionCliente;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +29,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -34,7 +41,7 @@ public class EvaluacionServicio extends AppCompatActivity implements View.OnClic
     private TextView cliente,proveedor;
     private Button evaluar;
     private RatingBar ratingbar;
-    private DatabaseReference mDatabase;
+
     private FirebaseAuth firebaseAuth;
     public  String Idvoucher,rut_proveedor,razonsocial,nombre_cliente;
     public static final String Voucher="voucher";
@@ -42,6 +49,8 @@ public class EvaluacionServicio extends AppCompatActivity implements View.OnClic
     public static final String nombreproveedor="nombre_proveedor";
     public static final String txtcliente="nombre_cliente";
     ArrayList<Voucher> voucher_list= new ArrayList<Voucher>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     private BottomNavigationView botonesNav;
 
@@ -49,7 +58,7 @@ public class EvaluacionServicio extends AppCompatActivity implements View.OnClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evaluacion_servicio);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         firebaseAuth = FirebaseAuth.getInstance();
 
         ratingbar = findViewById(R.id.rating);
@@ -136,45 +145,38 @@ public class EvaluacionServicio extends AppCompatActivity implements View.OnClic
 
 
 public  void evaluar(Valoracion pv){
+    final String[] idDocumento = new String[1];
 
-    mDatabase.child("Valoracion").child(pv.getIDvalorado()).setValue(pv);
+    db.collection("Valoracion").document(pv.getIDvalorado()).set(pv);
 
 
-    mDatabase.child("Voucher").addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+    db.collection("Voucher")
+            .whereEqualTo("idvoucher", Idvoucher)
+            .get()
+            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Voucher v = document.toObject(Voucher.class);
+                            idDocumento[0] =document.getId();
+                            Log.d("VVV", document.getId() + " => " + document.getData());
+                            voucher_list.add(v);
+                        }
 
-            for (DataSnapshot Voucher_snapshot : dataSnapshot.getChildren()){
+                        voucher_list.get(0).setValorado("1");
+                        db.collection("Voucher").document(idDocumento[0]).set(voucher_list.get(0));
 
-                Voucher v = Voucher_snapshot.getValue(Voucher.class);
+                        Toast t = Toast.makeText(EvaluacionServicio.this, "Gracias por tu tiempo!!", Toast.LENGTH_LONG);
+                        t.show();
+                        Intent Home = new Intent(EvaluacionServicio.this, HomeCliente.class);
+                        startActivity( Home);
 
-                if(v.getIDVoucher().equals(Idvoucher)){
-
-                    voucher_list.add(v);
-
+                    } else {
+                        Log.d("TAG", "Error getting documents: ", task.getException());
+                    }
                 }
-
-            }
-
-            voucher_list.get(0).setValorado("1");
-
-            mDatabase.child("Voucher").child(voucher_list.get(0).getIDVoucher()).setValue(voucher_list.get(0));
-
-
-
-            Toast t = Toast.makeText(EvaluacionServicio.this, "Gracias por tu tiempo!!", Toast.LENGTH_LONG);
-            t.show();
-            Intent Home = new Intent(EvaluacionServicio.this, HomeCliente.class);
-            startActivity( Home);
-
-
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    });
+            });
 
 
 }

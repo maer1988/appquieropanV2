@@ -4,6 +4,8 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 
 import com.example.appquieropan.opciones;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,6 +30,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -35,9 +40,9 @@ import java.util.ArrayList;
 public class ListaReservas extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerVoucherProveedor recyclerVoucherProveedor;
-    private DatabaseReference mDatabase;
     ArrayList<Voucher> list_voucher = new ArrayList<Voucher>();
     private FirebaseAuth firebaseAuth;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     RecyclerView mRecyclerView;
 
@@ -47,7 +52,6 @@ public class ListaReservas extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_reservas);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
         mRecyclerView = findViewById(R.id.recyclerView);
 
@@ -108,49 +112,27 @@ public class ListaReservas extends AppCompatActivity implements View.OnClickList
 
     public void CargarRecyclerView(final RecyclerView recyclerView){
 
+        db.collection("Voucher")
+                .whereEqualTo("tipoVenta", "efectivo")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Voucher v = document.toObject(Voucher.class);
+                                list_voucher.add(v);
+                            }
+
+                            recyclerVoucherProveedor = new RecyclerVoucherProveedor(list_voucher);
+                            recyclerView.setAdapter(recyclerVoucherProveedor);
 
 
-
-        mDatabase.child("Voucher").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot objSnatshot: dataSnapshot.getChildren() ){
-
-
-                    Voucher v = objSnatshot.getValue(Voucher.class);
-
-                    Log.d("id_pro",""+firebaseAuth.getCurrentUser().getUid());
-                    Log.d("id_pro_vouc",""+v.getIDproveedor());
-
-                    if(v.getIDproveedor().equals(firebaseAuth.getCurrentUser().getUid()) && (v.getTipoVenta().equals("efectivo") || v.getTipoVenta().equals("ambosPagos") )) {
-
-
-
-
-                        list_voucher.add(v);
-
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-
-
-                recyclerVoucherProveedor = new RecyclerVoucherProveedor(list_voucher);
-
-
-                recyclerView.setAdapter(recyclerVoucherProveedor);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-
+                });
     }
 
     @Override

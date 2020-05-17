@@ -4,6 +4,8 @@ import android.content.Intent;
 import androidx.annotation.NonNull;
 
 import com.example.appquieropan.Proveedor.RegistroProveedor.registroProveedor;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,11 +30,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class homeProveedor extends AppCompatActivity {
 
-    public static final String userProveedor="names";
-    public static final String codigoProvve="id";
+    public static final String codigoProvve = "id";
     TextView txtProveedor;
     ImageView salirP;
     Button facturas, segmentos, ventas;
@@ -42,7 +46,8 @@ public class homeProveedor extends AppCompatActivity {
     private String userP = null;
     //Declaramos un objeto firebaseAuth
     private FirebaseAuth firebaseAuth;
-    DatabaseReference databaseReference;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+
 
     private BottomNavigationView botonesNav;
 
@@ -52,13 +57,13 @@ public class homeProveedor extends AppCompatActivity {
         setContentView(R.layout.activity_home_proveedor);
         //inicializamos el objeto firebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+
 
 //        getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
 //        getSupportActionBar().setCustomView(R.layout.image_superior);
 
         txtProveedor =(TextView)findViewById(R.id.txtProveedor);
-        userP = getIntent().getStringExtra("id");
+
 
 
         salirP = findViewById(R.id.imgSalir);
@@ -136,35 +141,32 @@ public class homeProveedor extends AppCompatActivity {
             }
         });
 
-        obtieneRutEmpresa(userP);
-        ConfirmarRegistro();
+        obtieneRutEmpresa(firebaseAuth.getCurrentUser().getUid());
+        ConfirmarRegistro(firebaseAuth.getCurrentUser().getUid());
     }
 
     private void obtieneRutEmpresa(final String userP) {
 
-        databaseReference.child("Proveedor").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", userP)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                rutEmpresa = proveedor.getRut_proveedor();
+                                nombreEmpresa = proveedor.getNom_proveedor();
+                                txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
 
-                    Proveedor proveedor = snapshot.getValue(Proveedor.class);
-
-                    if(userP.equals(proveedor.getUid())){
-                        //cargaDatosPantalla(proveedor.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
-                        rutEmpresa = proveedor.getRut_proveedor();
-                        nombreEmpresa = proveedor.getNom_proveedor();
-                        txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
-
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
 
     }
@@ -192,30 +194,39 @@ public class homeProveedor extends AppCompatActivity {
 
     }
 
-    private void ConfirmarRegistro(){
-
-        databaseReference.child("Proveedor").orderByChild("uid").equalTo(firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists() == false){
-
-                    Intent intencion = new Intent(getApplication(), registroProveedor.class);
-                    intencion.putExtra(registroProveedor.codigoProvve, firebaseAuth.getCurrentUser().getUid());
-                    startActivity(intencion);
-
-                }else {
+    private void ConfirmarRegistro(String usp){
 
 
-                    Log.d("EX", "YA EXISTE EL CLIENTE");
-                }
-            }
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", usp)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                            if (task.getResult().isEmpty()) {
 
-            }
-        });
+                                Intent intencion = new Intent(getApplication(), registroProveedor.class);
+                                intencion.putExtra(registroProveedor.codigoProvve, firebaseAuth.getCurrentUser().getUid());
+                                startActivity(intencion);
+
+
+                            }
+
+                            else{
+
+                                Log.d("EX", "YA EXISTE EL CLIENTE");
+
+                            }
+
+
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
 
     }
 

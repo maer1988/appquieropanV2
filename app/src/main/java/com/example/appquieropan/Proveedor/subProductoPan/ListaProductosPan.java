@@ -2,11 +2,17 @@ package com.example.appquieropan.Proveedor.subProductoPan;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.example.appquieropan.Entidad.Producto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,22 +27,28 @@ import com.example.appquieropan.Proveedor.Ventas.tipoVenta;
 import com.example.appquieropan.Proveedor.homeProveedor;
 import com.example.appquieropan.Proveedor.opcionesSegmentoProveedor;
 import com.example.appquieropan.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
 public class ListaProductosPan extends AppCompatActivity implements View.OnClickListener{
 
     public static final String codigoProvve="id";
+    public static final String categoria="cat";
     private String userP = null;
+    private String tipo_cat = null;
     private String rutEmpresa = null;
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseAuth firebaseAuth;
     private RecyclerProductosAdapter recyclerProductosAdapter;
-    private DatabaseReference mDatabase;
     RecyclerView mRecyclerView;
 
     ImageView btnAgregarProd;
@@ -47,18 +59,19 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_productos_pan);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+        firebaseAuth = FirebaseAuth.getInstance();
 
         btnAgregarProd= findViewById(R.id.imgSinProductosPan);
         btnAgregarProd.setOnClickListener(this);
 
         userP = getIntent().getStringExtra("id");
+        tipo_cat = getIntent().getStringExtra("cat");
 
         mRecyclerView = findViewById(R.id.myRecyclerP);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(layoutManager);
-        obtieneRutEmpresa(userP);
-        CargarRecyclerView(mRecyclerView);
+        obtieneRutEmpresa(firebaseAuth.getCurrentUser().getUid());
+        CargarRecyclerView(mRecyclerView,tipo_cat);
 
         botonesNav = findViewById(R.id.botones_navegaPan);
 
@@ -69,7 +82,6 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
                 if (menuItem.getItemId()==R.id.nav_home){
                     //Toast.makeText(homeProveedor.this, "venta", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(ListaProductosPan.this, homeProveedor.class);
-                    intent.putExtra(homeProveedor.codigoProvve,userP);
                     startActivity(intent);
                     finish();
                 }
@@ -109,27 +121,26 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
 
     private void obtieneRutEmpresa(final String userP) {
 
-        mDatabase.child("Proveedor").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", userP)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                rutEmpresa = proveedor.getRut_proveedor();
+                               // nombreEmpresa = proveedor.getNom_proveedor();
+                                //txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
 
-                    Proveedor proveedor = snapshot.getValue(Proveedor.class);
-
-                    if(userP.equals(proveedor.getUid())){
-                        //cargaDatosPantalla(proveedor.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
-                        rutEmpresa = proveedor.getRut_proveedor();
-                        Toast.makeText(ListaProductosPan.this, rutEmpresa, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
 
     }
@@ -142,46 +153,54 @@ public class ListaProductosPan extends AppCompatActivity implements View.OnClick
             case R.id.imgSinProductosPan:
                 Intent intentP = new Intent(this, ingresaSubProductoPan.class);
                 intentP.putExtra(ingresaSubProductoPan.codigoProvve,userP);
+                intentP.putExtra(ingresaSubProductoPan.categoria,tipo_cat);
                 startActivity(intentP);
                 break;
         }
     }
 
-    public void CargarRecyclerView(RecyclerView recyclerView){
+    public void CargarRecyclerView(RecyclerView recyclerView, String tipo){
 
-        mDatabase = FirebaseDatabase.getInstance().getReference("SubProductoPan");
-        mDatabase.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                ArrayList<TipoSubProducto> arrayListTipo = new ArrayList<>();
+        db.collection("producto")
+                .whereEqualTo("categoria", tipo)
+                .whereEqualTo("rut_Empresa", "1-9")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                        ArrayList<Producto> arrayListTipo = new ArrayList<>();
 
-                    TipoSubProducto subProducto = snapshot.getValue(TipoSubProducto.class);
 
-                    if(rutEmpresa.equals(subProducto.getRut_Empresa())) {
+                        if (task.isSuccessful()) {
 
-                        subProducto.setNom_tipoSubProducto(subProducto.getNom_tipoSubProducto());
-                        subProducto.setDesc_tipoSubProducto(subProducto.getDesc_tipoSubProducto());
-                        subProducto.setUrlSubproducto(subProducto.getUrlSubproducto());
-                        subProducto.setUid(subProducto.getUid());
 
-                        arrayListTipo.add(subProducto);
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                Log.d("ESTO", document.getId() + " => " + document.getData());
+                                 Producto subProducto = document.toObject(Producto.class);
+                                subProducto.setNom_tipoSubProducto(subProducto.getNom_tipoSubProducto());
+                                subProducto.setDesc_tipoSubProducto(subProducto.getDesc_tipoSubProducto());
+                                subProducto.setUrlSubproducto(subProducto.getUrlSubproducto());
+                                subProducto.setUid(subProducto.getUid());
+
+                                arrayListTipo.add(subProducto);
+
+
+                            }
+                            recyclerProductosAdapter = new RecyclerProductosAdapter(getApplicationContext(), R.layout.item_ventas, arrayListTipo);
+                            mRecyclerView.setAdapter(recyclerProductosAdapter);
+
+                        }
+
+
+
+				else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-                recyclerProductosAdapter = new RecyclerProductosAdapter(getApplicationContext(),R.layout.item_ventas,arrayListTipo);
-                mRecyclerView.setAdapter(recyclerProductosAdapter);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
     }
 

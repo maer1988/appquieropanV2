@@ -6,6 +6,10 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.appquieropan.Entidad.Producto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,6 +38,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -48,6 +55,7 @@ public class CarroComprasCliente extends AppCompatActivity implements View.OnCli
     public static final String precio="precio";
     public static final String unidad="unidad";
     public String Redireccionar;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     private TextView seleccion_unidad, seleccioneCantidad, seleccioneTipoCompra, seleccioneTipoEntrega;
@@ -80,6 +88,7 @@ public class CarroComprasCliente extends AppCompatActivity implements View.OnCli
         codigoSubProductoCarro = getIntent().getStringExtra("cod");
         precio_unitario = getIntent().getStringExtra("precio");
         proveedor = getIntent().getStringExtra("rut");
+        Log.d("RP", "rut: "+proveedor);
         nombre_item = getIntent().getStringExtra("detalle");
         tipo_unidad = getIntent().getStringExtra("unidad");
 
@@ -166,11 +175,11 @@ public class CarroComprasCliente extends AppCompatActivity implements View.OnCli
                 break;
 
             case R.id.idSelTipoCompra:
-                opcionesproveedor("tipo_compra");
+                opcionesproveedor("tipo_compra", proveedor);
                 break;
 
             case R.id.idSelTipoEntrega:
-                opcionesproveedor("tipo_entrega");
+                opcionesproveedor("tipo_entrega", proveedor);
                 break;
 
 
@@ -402,30 +411,35 @@ public class CarroComprasCliente extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void cargaDatosProductoElegido(final String idProducto) {
+    private void cargaDatosProductoElegido(String idProducto) {
 
-        mDatabase.child("SubProductoPan").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("producto")
+                .whereEqualTo("id_producto", idProducto)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            if (task.getResult().isEmpty()) {
 
-                    TipoSubProducto tipoSubProducto = snapshot.getValue(TipoSubProducto.class);
+                                Log.d("QQQ", "nada que mostrar");
+                            }
+                            else {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
 
-                    Log.e("Datos","" + idProducto);
+                                    Log.d("PPP", document.getId() + " => " + document.getData());
 
-                    if(idProducto.equals(tipoSubProducto.getUid())){
-                        Log.e("Reales","" + tipoSubProducto.getNom_tipoSubProducto());
-                        cargaImagenProducto(tipoSubProducto.getUrlSubproducto(),tipoSubProducto.getRut_Empresa(), tipoSubProducto.getDesc_tipoSubProducto());
+                                    Producto p = document.toObject(Producto.class);
+                                    cargaImagenProducto(p.getUrlSubproducto(), p.getRut_Empresa(), p.getDesc_tipoSubProducto());
+
+                                }
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
     }
 
@@ -461,145 +475,129 @@ public class CarroComprasCliente extends AppCompatActivity implements View.OnCli
     }
 
 
-        private void CargarCarroCompra(final Producto_Pedido pp, final String siguiente){
+    private void CargarCarroCompra(final Producto_Pedido pp, final String siguiente){
 
 
-            mDatabase.child("Producto_pedido").addListenerForSingleValueEvent(new ValueEventListener() {
-             @Override
-             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                 int validar = 0;
+        db.collection("Producto_pedido")
+                .whereEqualTo("estado", "nuevo")
+                .whereEqualTo("idCliente", firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        int validar = 0;
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                 for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                                Producto_Pedido pp2 = document.toObject(Producto_Pedido.class);
+                                listproductopedido.add(pp2);
 
-                     Producto_Pedido pp2 = dataSnapshot1.getValue(Producto_Pedido.class);
+                                Log.d("TAG", document.getId() + " => " + document.getData());
+                            }
 
-
-                     if (pp2.getEstado().equals("nuevo") && pp2.getIdCliente().equals(firebaseAuth.getCurrentUser().getUid())) {
-                         listproductopedido.add(pp2);
-                     }
-
-
-                 }
-
-                 if (listproductopedido.size() > 0) {
-
-
-                     if (listproductopedido.get(0).getRut_proveedor().equals(pp.getRut_proveedor())) {
-
-                         mDatabase.child("Producto_pedido").child(pp.getUid()).setValue(pp);
-                         Toast t = Toast.makeText(CarroComprasCliente.this, "Producto agregado al carro con exito!!", Toast.LENGTH_LONG);
-                         t.show();
-
-                     } else {
+                            if (listproductopedido.size() > 0) {
 
 
+                                if (listproductopedido.get(0).getRut_proveedor().equals(pp.getRut_proveedor())) {
 
-                         validar = 1;  //captura si existe una diferencia entre el provedor del producto y el que actualmente existe en el carro
+                                    db.collection("Producto_pedido").document().set(pp);
+                                    Toast t = Toast.makeText(CarroComprasCliente.this, "Producto agregado al carro con exito!!", Toast.LENGTH_LONG);
+                                    t.show();
 
-
-                     }
-                 } else {
-
-                     mDatabase.child("Producto_pedido").child(pp.getUid()).setValue(pp);
-                     Toast t = Toast.makeText(CarroComprasCliente.this, "Producto agregado al carro con exito!!", Toast.LENGTH_LONG);
-                     t.show();
-
-                 }
-
-
-                 if(validar == 1) {
-
-                     Toast t = Toast.makeText(CarroComprasCliente.this, "No puede agregar porductos de distinto provedor", Toast.LENGTH_LONG);
-                     t.show();
-
-
-                 }
-
-else{
-
-                 if (siguiente.equals("home")) {
-
-                     Intent Home = new Intent(CarroComprasCliente.this, HomeCliente.class);
-                     startActivity(Home);
-                 } else {
-
-
-                     Intent Home = new Intent(CarroComprasCliente.this, ListadoItemCarro.class);
-                     Home.putExtra(ListadoItemCarro.tipo_pago, seleccioneTipoCompra.getText().toString());
-                     startActivity(Home);
-                     finish();
-
-
-                 }
-
-
-             }
-
-
-    }
-
-    @Override
-    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-    }
-});
+                                } else {
 
 
 
+                                    validar = 1;  //captura si existe una diferencia entre el provedor del producto y el que actualmente existe en el carro
 
-}
+
+                                }
+                            } else {
+
+                                db.collection("Producto_pedido").document().set(pp);
+                                Toast t = Toast.makeText(CarroComprasCliente.this, "Producto agregado al carro con exito!!", Toast.LENGTH_LONG);
+                                t.show();
+
+                            }
 
 
-private void opcionesproveedor(final String opcion){
+                            if(validar == 1) {
 
-        mDatabase.child("Proveedor").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                Toast t = Toast.makeText(CarroComprasCliente.this, "No puede agregar porductos de distinto provedor", Toast.LENGTH_LONG);
+                                t.show();
 
-                for(DataSnapshot snap: dataSnapshot.getChildren() ){
 
-                    Proveedor p = snap.getValue(Proveedor.class);
+                            }
 
-                    if (proveedor.equalsIgnoreCase(p.getRut_proveedor())){
+                            else{
 
-                        proveedor_list.add(p);
+                                if (siguiente.equals("home")) {
 
+                                    Intent Home = new Intent(CarroComprasCliente.this, HomeCliente.class);
+                                    startActivity(Home);
+                                } else {
+
+
+                                    Intent Home = new Intent(CarroComprasCliente.this, ListadoItemCarro.class);
+                                    Home.putExtra(ListadoItemCarro.tipo_pago, seleccioneTipoCompra.getText().toString());
+                                    startActivity(Home);
+                                    finish();
+
+
+                                }
+
+
+                            }
+
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
+                });
 
-                }
-
-                switch (opcion){
-
-                    case "tipo_compra":
-
-                     seleccioneOpcionesTC(proveedor_list);
+    }
 
 
-                    break;
+    private void opcionesproveedor(final String opcion, final String proveedor){
 
 
-                    case  "tipo_entrega":
+        db.collection("Proveedor")
+                .whereEqualTo("rut_proveedor", proveedor)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                        seleccioneOpcionesTE(proveedor_list);
+                                Proveedor p = document.toObject(Proveedor.class);
+                                proveedor_list.add(p);
+                            }
+                            switch (opcion){
 
-                        break;
+                                case "tipo_compra":
 
-                }
-
-
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                                    seleccioneOpcionesTC(proveedor_list);
 
 
-}
+                                    break;
+
+
+                                case  "tipo_entrega":
+
+                                    seleccioneOpcionesTE(proveedor_list);
+
+                                    break;
+
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
+
+    }
 
 
 

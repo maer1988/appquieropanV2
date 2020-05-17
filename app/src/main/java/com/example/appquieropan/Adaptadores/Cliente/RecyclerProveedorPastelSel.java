@@ -118,7 +118,6 @@ public class RecyclerProveedorPastelSel extends RecyclerView.Adapter<RecyclerPro
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     //Toast.makeText(mCcontext, "valores : "+imagenProducto, Toast.LENGTH_SHORT).show();
                     intent.putExtra(SubProductoElegidoPan.idSubproducto,mID.getText().toString());
-                    intent.putExtra(SubProductoElegidoPan.Tabla,"SubProductoPastel");
                     mCcontext.startActivity(intent);
 
                     break;

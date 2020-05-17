@@ -11,6 +11,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,16 +20,22 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.example.appquieropan.Entidad.Producto;
 import com.example.appquieropan.Entidad.Proveedor;
 import com.example.appquieropan.Entidad.TipoSubProducto;
 import com.example.appquieropan.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -40,8 +47,10 @@ import java.util.UUID;
 public class ingresaSubProductoPan extends AppCompatActivity implements View.OnClickListener  {
 
     public static final String codigoProvve="id";
+    public static final String categoria="cat";
     private String userP = null;
-
+    private String tipo_cat = null;
+    private FirebaseAuth firebaseAuth;
     private ImageView imagenProducto;
     private Uri filepath;
     private final int PIC_FOTO = 1;
@@ -50,6 +59,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
     private  int flagImgen = 1;
     private String datoRadio= null;
     private String rutEmpresa = null;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
     private RadioGroup radioGroup;
@@ -62,7 +72,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ingresa_sub_producto_pan);
-
+        firebaseAuth = FirebaseAuth.getInstance();
         storageReference = FirebaseStorage.getInstance().getReference();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         imagenProducto = findViewById(R.id.imgNuevoProducto);
@@ -72,7 +82,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
         radioGroup = findViewById(R.id.radioGroup5);
         radio1 = findViewById(R.id.radioKilo);
         radio2 = findViewById(R.id.radioUnidad);
-
+        tipo_cat = getIntent().getStringExtra("cat");
         userP = getIntent().getStringExtra("id");
 
         btnAgregarProductoPan = findViewById(R.id.btnGuardarProducto);
@@ -85,27 +95,26 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
 
     private void obtieneRutEmpresa(final String userP) {
 
-        databaseReference.child("Proveedor").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", userP)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                rutEmpresa = proveedor.getRut_proveedor();
 
-                    Proveedor proveedor = snapshot.getValue(Proveedor.class);
 
-                    if(userP.equals(proveedor.getUid())){
-                        //cargaDatosPantalla(proveedor.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
-                        rutEmpresa = proveedor.getRut_proveedor();
-                        Toast.makeText(ingresaSubProductoPan.this, rutEmpresa, Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
+                });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
     }
 
@@ -198,7 +207,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
                                     while (!uri.isComplete());
                                     Uri url = uri.getResult();
                                     //objeto de tipo subproducto
-                                    TipoSubProducto tipoSubProducto = new TipoSubProducto();
+                                    Producto tipoSubProducto = new Producto();
 
                                     tipoSubProducto.setUid(UUID.randomUUID().toString());
                                     tipoSubProducto.setNom_tipoSubProducto(nombrePan);
@@ -207,9 +216,11 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
                                     tipoSubProducto.setTipoVentaProducto(datoRadio);
                                     tipoSubProducto.setPrecio(precioPan);
                                     tipoSubProducto.setRut_Empresa(rutEmpresa);
+                                    tipoSubProducto.setCategoria(tipo_cat);
 
-                                    databaseReference.child("SubProductoPan").child(tipoSubProducto.getUid()).setValue(tipoSubProducto);
-                                    //databaseReference.child(databaseReference.push().getKey()).setValue(tipoSubProducto);
+
+                                    db.collection("producto").document(tipoSubProducto.getUid()).set(tipoSubProducto);
+
 
                                     Toast.makeText(ingresaSubProductoPan.this,"Archivo subido",Toast.LENGTH_SHORT).show();
                                     progressDialog.dismiss();

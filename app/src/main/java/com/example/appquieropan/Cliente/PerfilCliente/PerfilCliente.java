@@ -15,6 +15,7 @@ import com.example.appquieropan.Entidad.Cliente;
 import com.example.appquieropan.Entidad.Cliente_direccion;
 import com.example.appquieropan.Entidad.Proveedor;
 import com.example.appquieropan.Proveedor.Perfil.PerfilProveedor;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -51,6 +52,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -64,7 +68,7 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
 
     private Button guardarPerfil,btnVolver,direcciones;
     private TextView nombre_cliente,direccion_cliente,correo_cliente,telefono_cliente,comuna_cliente,ciudad_cliente;
-    private DatabaseReference DatabaseReference;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth firebaseAuth;
 
 
@@ -73,7 +77,6 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_perfil_cliente);
 
-        DatabaseReference = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
 
 
@@ -240,8 +243,9 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
                                 cliente.setId_cliente(firebaseAuth.getCurrentUser().getUid());
 
                              Log.d("current",""+firebaseAuth.getCurrentUser().getUid());
-                                DatabaseReference.child("Cliente").child(firebaseAuth.getCurrentUser().getUid()).setValue(cliente);
 
+
+                                db.collection("Cliente").document(firebaseAuth.getCurrentUser().getUid()).set(cliente);
 
                                   Intent intent = new Intent(PerfilCliente.this, HomeCliente.class);
                                   intent.putExtra(HomeCliente.idCliente,firebaseAuth.getCurrentUser().getUid());
@@ -261,30 +265,24 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
 
     private void cargarDatosVistaPerfil(final String idcliente) {
 
-        DatabaseReference.child("Cliente").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot CLIENTdataSnapshot) {
 
-                for(DataSnapshot snapshot: CLIENTdataSnapshot.getChildren()){
-
-                   Cliente cliente = snapshot.getValue(Cliente.class);
-
-                    Log.e("Datos","" + idcliente);
-
-                    if(idcliente.equals(cliente.getId_cliente())){
-                        Log.e("Reales","" + cliente.getNom_cliente());
-                        cargaDatosPantalla(cliente.getId_cliente(),cliente.getNom_cliente(),cliente.getEmail_cliente(),cliente.getTelefono());
-
-
+        db.collection("Cliente")
+                .whereEqualTo("id_cliente", idcliente)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Cliente cliente = document.toObject(Cliente.class);
+                                cargaDatosPantalla(cliente.getId_cliente(),cliente.getNom_cliente(),cliente.getEmail_cliente(),cliente.getTelefono());
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
+                });
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
 
     }
 
@@ -293,49 +291,45 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
         final String[][] dir = {new String[3]};
 
 
-        DatabaseReference.child("Cliente_direccion").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dirdataSnapshot) {
+        db.collection("Cliente_direccion")
+                .whereEqualTo("id_cliente", firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
 
-                for(DataSnapshot snapshot: dirdataSnapshot.getChildren()){
 
-                    Cliente_direccion cliente_dir = snapshot.getValue(Cliente_direccion.class);
+                                Cliente_direccion cliente_dir = document.toObject(Cliente_direccion.class);
 
-                    Log.e("Datos","" + idcliente);
+                                if (cliente_dir.getDireccion() == "" || cliente_dir.getDireccion().isEmpty() || cliente_dir.getDireccion() == null) {
 
-                    if(idcliente.equals(cliente_dir.getUid())){
+                                    dir[0][0]="";
+                                    dir[0][1]="";
+                                    dir[0][2]="";
+                                }
+                                else{
 
-                        if (cliente_dir.getDireccion() == "" || cliente_dir.getDireccion().isEmpty() || cliente_dir.getDireccion() == null) {
+                                    dir[0][0] = cliente_dir.getDireccion();
+                                    dir[0][1] = cliente_dir.getComuna();
+                                    dir[0][2] = cliente_dir.getCiudad();
 
-                            dir[0][0]="";
-                            dir[0][1]="";
-                            dir[0][2]="";
+                                }
+
+
+
+                                direccion_cliente.setText(dir[0][0]);
+                                comuna_cliente.setText(dir[0][1]);
+                                ciudad_cliente.setText(dir[0][2]);
+
+
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-                        else{
-
-                            dir[0][0] = cliente_dir.getDireccion();
-                            dir[0][1] = cliente_dir.getComuna();
-                            dir[0][2] = cliente_dir.getCiudad();
-
-                        }
-
                     }
-
-                    direccion_cliente.setText(dir[0][0]);
-                    comuna_cliente.setText(dir[0][1]);
-                    ciudad_cliente.setText(dir[0][2]);
-                }
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
 
         nombre_cliente.setText(nom);
@@ -343,7 +337,7 @@ public class PerfilCliente extends AppCompatActivity implements View.OnClickList
         telefono_cliente.setText(telefono);
 
 
-        }
+    }
 
 
     @Override

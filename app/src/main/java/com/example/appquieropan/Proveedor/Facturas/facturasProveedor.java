@@ -74,7 +74,6 @@ public class facturasProveedor extends AppCompatActivity {
 
                 if (menuItem.getItemId()==R.id.nav_home){
                     Intent intent = new Intent(facturasProveedor.this, homeProveedor.class);
-                    intent.putExtra(homeProveedor.codigoProvve,userP);
                     startActivity(intent);
                     finish();
                     //Toast.makeText(facturasProveedor.this, "home", Toast.LENGTH_SHORT).show();

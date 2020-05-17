@@ -2,10 +2,14 @@ package com.example.appquieropan.Proveedor;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -20,21 +24,26 @@ import com.example.appquieropan.Proveedor.subProductoMasa.ListaProductosMasa;
 import com.example.appquieropan.Proveedor.subProductoPan.ListaProductosPan;
 import com.example.appquieropan.Proveedor.subProductoPastel.ListaProductosPastel;
 import com.example.appquieropan.R;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 public class opcionesSegmentoProveedor extends AppCompatActivity implements View.OnClickListener {
 
     public static final String codigoProvve="id";
-
+    private FirebaseAuth firebaseAuth;
     Button btn_pan, btn_masa,btn_pastel, btn_otros;
     private BottomNavigationView botonesNav;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    private DatabaseReference mDatabase;
+
 
     String userP = null;
     private String rutEmpresa = null;
@@ -44,10 +53,9 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_opciones_segmento_proveedor);
+        firebaseAuth = FirebaseAuth.getInstance();
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        userP = getIntent().getStringExtra("id");
+        userP = firebaseAuth.getCurrentUser().getUid();
 
         btn_pan = findViewById(R.id.btnPan);
         btn_masa = findViewById(R.id.btnAmansanderia);
@@ -67,7 +75,6 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
 
                 if (menuItem.getItemId()==R.id.nav_home){
                     Intent intent = new Intent(opcionesSegmentoProveedor.this, homeProveedor.class);
-                    intent.putExtra(homeProveedor.codigoProvve,userP);
                     startActivity(intent);
                     finish();
                     //Toast.makeText(facturasProveedor.this, "home", Toast.LENGTH_SHORT).show();
@@ -112,25 +119,27 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
         switch (v.getId()){
 
             case R.id.btnPan:
-                crearRelacionPanProveedor();
+
                 Intent intentP = new Intent(this, ListaProductosPan.class);
                 intentP.putExtra(ListaProductosPan.codigoProvve,userP);
+                intentP.putExtra(ListaProductosPan.categoria,"panaderia");
                 startActivity(intentP);
                 break;
             case R.id.btnAmansanderia:
-                crearRelacionMasaProveedor();
+
                 Intent intenta = new Intent(this, ListaProductosMasa.class);
-                intenta.putExtra(ListaProductosMasa.codigoProvve,userP);
+                intenta.putExtra(ListaProductosPan.codigoProvve,userP);
+                intenta.putExtra(ListaProductosPan.categoria,"amasanderia");
                 startActivity(intenta);
                 break;
             case R.id.btnPasteleria:
-                crearRelacionPastelProveedor();
+
                 Intent intentPs = new Intent(this, ListaProductosPastel.class);
-                intentPs.putExtra(ListaProductosPastel.codigoProvve,userP);
+                intentPs.putExtra(ListaProductosPan.codigoProvve,userP);
+                intentPs.putExtra(ListaProductosPan.categoria,"pasteleria");
                 startActivity(intentPs);
                 break;
             case R.id.btnOtros:
-                crearRelacionOtrasMasaProveedor();
                 Toast.makeText(this, "Sin Opcion", Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -141,83 +150,44 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
 
         Producto producto = new Producto();
         producto.setId_producto(userP);
-        producto.setDesc_producto("OtrasMasas");
-        producto.setRut_empresa(rutEmpresa);
+        producto.setDesc_tipoSubProducto("OtrasMasas");
+        producto.setRut_Empresa(rutEmpresa);
         producto.setNom_empresa(nombreEmpresa);
         //proveedor.setEmail_proveedor(email.getText().toString());
         //proveedor.setNom_proveedor(rSocial.getText().toString().trim());
         //proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-        mDatabase.child("OtrasMasas_Proveedor").child(producto.getId_producto()).setValue(producto);
+
 
     }
 
-    private void crearRelacionPastelProveedor() {
 
-        Producto producto = new Producto();
-        producto.setId_producto(userP);
-        producto.setDesc_producto("Pastel");
-        producto.setRut_empresa(rutEmpresa);
-        producto.setNom_empresa(nombreEmpresa);
-        //proveedor.setEmail_proveedor(email.getText().toString());
-        //proveedor.setNom_proveedor(rSocial.getText().toString().trim());
-        //proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-        mDatabase.child("Pastel_Proveedor").child(producto.getId_producto()).setValue(producto);
 
-    }
 
-    private void crearRelacionMasaProveedor() {
 
-        Producto producto = new Producto();
-        producto.setId_producto(userP);
-        producto.setDesc_producto("Masa");
-        producto.setRut_empresa(rutEmpresa);
-        producto.setNom_empresa(nombreEmpresa);
-        //proveedor.setEmail_proveedor(email.getText().toString());
-        //proveedor.setNom_proveedor(rSocial.getText().toString().trim());
-        //proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-        mDatabase.child("Masa_Proveedor").child(producto.getId_producto()).setValue(producto);
 
-    }
-
-    private void crearRelacionPanProveedor() {
-
-        Producto producto = new Producto();
-        producto.setId_producto(userP);
-        producto.setDesc_producto("Pan");
-        producto.setRut_empresa(rutEmpresa);
-        producto.setNom_empresa(nombreEmpresa);
-        //proveedor.setEmail_proveedor(email.getText().toString());
-        //proveedor.setNom_proveedor(rSocial.getText().toString().trim());
-        //proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-        mDatabase.child("Pan_Proveedor").child(producto.getId_producto()).setValue(producto);
-
-    }
 
     private void obtieneRutEmpresa(final String userP) {
 
-        mDatabase.child("Proveedor").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor", userP)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Proveedor proveedor = document.toObject(Proveedor.class);
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                                rutEmpresa = proveedor.getRut_proveedor();
+                                nombreEmpresa = proveedor.getNom_proveedor();
+                                //txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
 
-                    Proveedor proveedor = snapshot.getValue(Proveedor.class);
-
-                    if(userP.equals(proveedor.getUid())){
-                        //cargaDatosPantalla(proveedor.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(),subProducto.getPrecio(),subProducto.getUrlSubproducto());
-                        rutEmpresa = proveedor.getRut_proveedor();
-                        nombreEmpresa = proveedor.getNom_proveedor();
-                        //txtProveedor.setText("¡Bienvenido "+ nombreEmpresa +"!");
-
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
 
     }

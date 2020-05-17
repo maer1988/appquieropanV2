@@ -31,11 +31,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class loginCliente extends AppCompatActivity implements View.OnClickListener{
 
-
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth firebaseAuth;
     private DatabaseReference mDatabase;
     GoogleSignInClient mGoogleSignInClient;
@@ -129,35 +135,40 @@ public class loginCliente extends AppCompatActivity implements View.OnClickListe
 
     private void registrarUsuario() {
 
-        mDatabase.child("Cliente").orderByChild("id_cliente").equalTo(firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Cliente")
+                .whereEqualTo("id_cliente",firebaseAuth.getCurrentUser().getUid() )
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-               if (dataSnapshot.exists() == false){
+                            if (task.getResult().isEmpty()) {
 
-                   Cliente cl = new Cliente();
+                                CollectionReference cliente = db.collection("Cliente");
 
-
-                   cl.setEmail_cliente(firebaseAuth.getCurrentUser().getEmail());
-                   cl.setId_cliente(firebaseAuth.getCurrentUser().getUid());
-                   cl.setNom_cliente(firebaseAuth.getCurrentUser().getDisplayName());
-
-                  mDatabase.child("Cliente").child(cl.getId_cliente()).setValue(cl);
-
-
-               }else {
-                   Log.d("EX", "YA EXISTE EL CLIENTE");
-               }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                                Map<String, Object> ggbData = new HashMap<>();
+                                ggbData.put("id_cliente",firebaseAuth.getCurrentUser().getUid());
+                                ggbData.put("nom_cliente", firebaseAuth.getCurrentUser().getDisplayName());
+                                ggbData.put("email_cliente", firebaseAuth.getCurrentUser().getEmail());
+                                cliente.document(firebaseAuth.getCurrentUser().getUid()).set(ggbData);
 
 
-    }
+
+
+                            }
+                            else
+                            {
+                                Log.d("MMM1", "YA EXISTE EL CLIENTE");
+                            }
+                        }
+                     else {
+                        Log.d("MMMM2", "Error getting documents: ", task.getException());
+                    }
+                    }
+
+    });
+}
 
     @Override
     public void onStart() {
@@ -195,5 +206,6 @@ public class loginCliente extends AppCompatActivity implements View.OnClickListe
         finish();
 
     }
+
 
 }

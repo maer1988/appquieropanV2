@@ -134,7 +134,6 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
                 if (menuItem.getItemId()==R.id.nav_home){
                     Intent intent = new Intent(PerfilProveedor.this, homeProveedor.class);
-                    intent.putExtra(homeProveedor.codigoProvve,userP);
                     startActivity(intent);
                     finish();
                     //Toast.makeText(facturasProveedor.this, "home", Toast.LENGTH_SHORT).show();
@@ -320,9 +319,9 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
                                 proveedor.setTipo_Pago_Proveedor(eleccionPago);
                                 proveedor.setTipo_Despacho_Proveedor(eleccioEntrega);
                                 //proveedor.setTipoVentaProducto(datoRadio);
-                                proveedor.setUid(getIntent().getStringExtra("idProveedor"));
+                                proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
-                                mDatabase.child("Proveedor").child(proveedor.getUid()).setValue(proveedor);
+                                mDatabase.child("Proveedor").child(proveedor.getId_proveedor()).setValue(proveedor);
                                 //databaseReference.child(databaseReference.push().getKey()).setValue(tipoSubProducto);
 
                                 Toast.makeText(PerfilProveedor.this,"Producto actualizado",Toast.LENGTH_SHORT).show();
@@ -433,7 +432,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
                     Log.e("Datos","" + idProveedor);
 
-                    if(idProveedor.equals(proveedor.getUid())){
+                    if(idProveedor.equals(proveedor.getId_proveedor())){
                         Log.e("Reales","" + proveedor.getNom_proveedor());
                         cargaDatosPantalla(proveedor.getNom_proveedor(),proveedor.getRut_proveedor(),proveedor.getUrl_proveedor(),
                                 proveedor.getDireccion_proveedor(),proveedor.getFono1_proveedor(),proveedor.getTipo_Despacho_Proveedor(),
@@ -530,9 +529,9 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         proveedor.setTipo_Despacho_Proveedor(opcionEntrega);
         //proveedor.setTipoVentaProducto(datoRadio);
         proveedor.setUrl_proveedor(urlGuardada);
-        proveedor.setUid(getIntent().getStringExtra("idProveedor"));
+        proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
-        mDatabase.child("Proveedor").child(proveedor.getUid()).setValue(proveedor);
+        mDatabase.child("Proveedor").child(proveedor.getId_proveedor()).setValue(proveedor);
 
         Toast.makeText(PerfilProveedor.this,"Pefil actualizado",Toast.LENGTH_SHORT).show();
 

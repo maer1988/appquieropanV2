@@ -29,11 +29,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class registroProveedor extends AppCompatActivity implements View.OnClickListener {
 
     private FirebaseAuth mAuth;
-    private DatabaseReference mDatabase;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String TAG ="RegistroProveedor";
     private EditText rSocial,rutEmpresa,rDireccion;
     private Button btnRegistraProveedor;
@@ -46,7 +47,7 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
         setContentView(R.layout.activity_registro_proveedor);
         userP = getIntent().getStringExtra("id");
         mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
 
         rDireccion = findViewById(R.id.direccion);
@@ -97,13 +98,14 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
                             String uid = user.getUid();
 
                             Proveedor proveedor = new Proveedor();
-                            proveedor.setUid(uid);
+                            proveedor.setId_proveedor(uid);
                             proveedor.setNom_proveedor(rSocial.getText().toString().trim());
                             proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
                             proveedor.setDireccion_proveedor(rDireccion.getText().toString().trim());
                             String id = uid;
-                            mDatabase.child("Proveedor").child(uid).setValue(proveedor);
 
+
+                            db.collection("Proveedor").document(uid).set(proveedor);
                             new GetCoordinates().execute(direccion.replace(" ","+"));
 
                             Intent intentP = new Intent(getApplication(), homeProveedor.class);
@@ -160,16 +162,18 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
                         .getJSONObject("location").get("lng").toString();
 
 
+                Log.d("COOR", "lat=>"+lat+" lng=>"+lng);
+
                 FirebaseUser user = mAuth.getCurrentUser();
                 String uid = user.getUid();
 
                 Proveedor pro = new Proveedor();
-                pro.setUid(uid);
+                pro.setId_proveedor(uid);
                 pro.setLatitud(lat);
                 pro.setLongitud(lng);
 
-                mDatabase.child("Proveedor").child(uid).setValue(pro);
 
+                db.collection("Proveedor").document(uid).set(pro);
 
 
 

@@ -2,12 +2,16 @@ package com.example.appquieropan.Cliente.CarroDeCompras;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -23,6 +27,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -36,6 +43,7 @@ public class ListadoVoucher extends AppCompatActivity implements View.OnClickLis
     public static final String opcion_voucher="ov";
     String flag_voucher;
     private TextView subtitulo,datos_vacios;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     RecyclerView mRecyclerView;
 
@@ -109,51 +117,39 @@ public class ListadoVoucher extends AppCompatActivity implements View.OnClickLis
     public void CargarRecyclerView(final RecyclerView recyclerView){
 
 
+        db.collection("Voucher")
+                .whereEqualTo("idcliente", firebaseAuth.getCurrentUser().getUid())
+                .whereEqualTo("estado", flag_voucher)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Voucher v =  document.toObject(Voucher.class);
+                                list_voucher.add(v);
+                            }
+
+                            if (list_voucher.size() > 0) {
+                                recyclerVoucher = new RecyclerVoucher(list_voucher);
+                                recyclerView.setAdapter(recyclerVoucher);
+                                mRecyclerView.setVisibility(View.VISIBLE);
+                                datos_vacios.setVisibility(View.GONE);
+                            }
+                            else {
+
+                                mRecyclerView.setVisibility(View.GONE);
+                                datos_vacios.setVisibility((View.VISIBLE));
+
+                            }
 
 
-        mDatabase.child("Voucher").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot objSnatshot : dataSnapshot.getChildren()) {
-
-
-                    Voucher v = objSnatshot.getValue(Voucher.class);
-
-                    if (v.getIDcliente().equals(firebaseAuth.getCurrentUser().getUid()) && v.getEstado().equals(flag_voucher)) {
-
-                        list_voucher.add(v);
-
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-
-                if (list_voucher.size() > 0) {
-                    recyclerVoucher = new RecyclerVoucher(list_voucher);
-                    recyclerView.setAdapter(recyclerVoucher);
-                    mRecyclerView.setVisibility(View.VISIBLE);
-                    datos_vacios.setVisibility(View.GONE);
-                }
-                    else {
-
-                    mRecyclerView.setVisibility(View.GONE);
-                    datos_vacios.setVisibility((View.VISIBLE));
-
-                }
-
-
-
-
-            }
-
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
 
     }

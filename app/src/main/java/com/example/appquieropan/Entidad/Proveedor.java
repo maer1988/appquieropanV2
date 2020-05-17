@@ -2,7 +2,7 @@ package com.example.appquieropan.Entidad;
 
 public class Proveedor {
 
-    private String uid;
+    private String id_proveedor;
     private String rut_proveedor="";
     private String nom_proveedor="";
     private String direccion_proveedor="";
@@ -40,12 +40,12 @@ public class Proveedor {
         this.direccion_proveedor = direccion_proveedor;
     }
 
-    public String getUid() {
-        return uid;
+    public String getId_proveedor() {
+        return id_proveedor;
     }
 
-    public void setUid(String uid) {
-        this.uid = uid;
+    public void setId_proveedor(String id_proveedor) {
+        this.id_proveedor = id_proveedor;
     }
 
     public String getRut_proveedor() {

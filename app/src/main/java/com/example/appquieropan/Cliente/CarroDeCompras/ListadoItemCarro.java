@@ -2,6 +2,9 @@ package com.example.appquieropan.Cliente.CarroDeCompras;
 
 import android.content.Intent;
 import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.appquieropan.Adaptadores.Cliente.RecyclerItemCarro;
 import com.example.appquieropan.Cliente.HomeCliente;
@@ -24,6 +28,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -39,6 +46,7 @@ public class ListadoItemCarro extends AppCompatActivity implements View.OnClickL
     private TextView total;
     String TipoPago;
     RecyclerView mRecyclerView;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private BottomNavigationView botonesNav;
 
@@ -56,6 +64,13 @@ public class ListadoItemCarro extends AppCompatActivity implements View.OnClickL
         btnCancelar.setOnClickListener(this);
         TipoPago= getIntent().getStringExtra("tp");
         Log.d("TIPO_PAGO",""+TipoPago);
+
+
+        Toast toast1 =
+                Toast.makeText(getApplicationContext(),
+                        "ESTOY EN LISTADO CARRO", Toast.LENGTH_SHORT);
+
+        toast1.show();
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
@@ -110,41 +125,32 @@ public class ListadoItemCarro extends AppCompatActivity implements View.OnClickL
 
 
     public void CargarRecyclerView(final RecyclerView recyclerView){
+        final int[] total_carro = {0};
+        db.collection("Producto_pedido")
+                .whereEqualTo("estado", "nuevo")
+                .whereEqualTo("idCliente", firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Producto_Pedido pp = document.toObject(Producto_Pedido.class);
+                                listproducto_pedido.add(pp);
+                                total_carro[0] = total_carro[0] + Integer.parseInt(pp.total_precio());
+                                Log.d("TAG", document.getId() + " => " + document.getData());
+                            }
+                            total.setText(Integer.toString(total_carro[0]));
+                            RecyclerItemCarro = new RecyclerItemCarro(listproducto_pedido);
 
 
+                            recyclerView.setAdapter(RecyclerItemCarro);
 
-
-   mDatabase.child("Producto_pedido").addValueEventListener(new ValueEventListener() {
-       @Override
-       public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-           int total_carro=0;
-           for(DataSnapshot objSnatshot: dataSnapshot.getChildren() ){
-
-
-               Producto_Pedido pp = objSnatshot.getValue(Producto_Pedido.class);
-
-               if(pp.getEstado().equals("nuevo") && pp.getIdCliente().equals(firebaseAuth.getCurrentUser().getUid())) {
-
-                   listproducto_pedido.add(pp);
-                   total_carro = total_carro + Integer.parseInt(pp.total_precio());
-               }
-
-           }
-
-           Log.d("XXX",""+listproducto_pedido.size());
-           total.setText(Integer.toString(total_carro));
-           RecyclerItemCarro = new RecyclerItemCarro(listproducto_pedido);
-
-
-           recyclerView.setAdapter(RecyclerItemCarro);
-
-       }
-
-       @Override
-       public void onCancelled(@NonNull DatabaseError databaseError) {
-
-       }
-   });
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
 
 
 

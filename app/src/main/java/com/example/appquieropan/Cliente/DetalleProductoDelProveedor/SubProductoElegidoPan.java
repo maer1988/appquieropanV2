@@ -5,6 +5,10 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.example.appquieropan.Entidad.Producto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,14 +38,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 public class SubProductoElegidoPan extends AppCompatActivity implements View.OnClickListener {
 
     public static final String idSubproducto="cod";
-    public static final String Tabla="tabla";
-    public static final String Nombre_tabla="";
+
 
 
 
@@ -54,6 +60,7 @@ public class SubProductoElegidoPan extends AppCompatActivity implements View.OnC
     StorageReference storageReference;
     private FirebaseStorage mStorage;
     private String codigoSubProducto;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private BottomNavigationView botonesNav;
 
@@ -74,14 +81,15 @@ public class SubProductoElegidoPan extends AppCompatActivity implements View.OnC
 
 
         codigoSubProducto = getIntent().getStringExtra("cod");
+        Log.d("id_prod", "id_producto"+codigoSubProducto);
 
-        Toast.makeText(this, codigoSubProducto, Toast.LENGTH_SHORT).show();
 
         btnSiguiente.setOnClickListener(this);
 
+
         cargaDatosProductoElegido(codigoSubProducto);
         rutProveedor=findViewById(R.id.rutProveedor);
-      //  Log.d("rut_prov","XXX" +  rutProveedor.getText().toString());
+        //  Log.d("rut_prov","XXX" +  rutProveedor.getText().toString());
 
         botonesNav = findViewById(R.id.botones_navegacion_subprd_elegido);
         botonesNav.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -142,73 +150,69 @@ public class SubProductoElegidoPan extends AppCompatActivity implements View.OnC
 
     }
 
-    private void cargaDatosProductoElegido(final String idProducto) {
+    private void cargaDatosProductoElegido(String idProducto) {
 
-        mDatabase.child(getIntent().getStringExtra("tabla")).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("producto")
+                .whereEqualTo("id_producto", idProducto)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                            if (task.getResult().isEmpty()) {
 
-                    TipoSubProducto tipoSubProducto = snapshot.getValue(TipoSubProducto.class);
+                                Log.d("QQQ", "nada que mostrar");
+                            }
+                            else {
+                                for (QueryDocumentSnapshot document : task.getResult()) {
 
-                    Log.e("Datos","" + idProducto);
-                    Log.e("Tipo","" + tipoSubProducto.getUid());
 
-                    if(idProducto.equals(tipoSubProducto.getUid())){
-                        Log.e("Reales","" + tipoSubProducto.getNom_tipoSubProducto());
-                        cargaImagenProducto(tipoSubProducto.getUrlSubproducto(),tipoSubProducto.getRut_Empresa(), tipoSubProducto.getDesc_tipoSubProducto());
-                        Log.d("rut_prov","XXX" +  tipoSubProducto.getRut_Empresa());
 
+                                    Producto p = document.toObject(Producto.class);
+                                    cargaImagenProducto(p.getUrlSubproducto(), p.getRut_Empresa(), p.getDesc_tipoSubProducto());
+
+                                }
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
     }
 
 
     public void MandarDatos(final String idProducto, final Intent carroPan){
 
-        mDatabase.child(getIntent().getStringExtra("tabla")).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-
-                    TipoSubProducto tipoSubProducto2 = snapshot.getValue(TipoSubProducto.class);
-
-
-
-                    if(idProducto.equals(tipoSubProducto2.getUid())){
+        db.collection("producto")
+                .whereEqualTo("id_producto", idProducto)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
 
-                        carroPan.putExtra(CarroComprasCliente.idSubproducto,tipoSubProducto2.getUid());
-                        carroPan.putExtra(CarroComprasCliente.rut_proveedor,tipoSubProducto2.getRut_Empresa());
-                        carroPan.putExtra(CarroComprasCliente.precio,tipoSubProducto2.getPrecio());
-                        carroPan.putExtra(CarroComprasCliente.nombre,tipoSubProducto2.getNom_tipoSubProducto());
-                        carroPan.putExtra(CarroComprasCliente.unidad,tipoSubProducto2.getTipoVentaProducto());
-                        startActivity(carroPan);
-                        finish();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+
+                                Producto p2 = document.toObject(Producto.class);
+                                Log.d("ENTRO", "rut prove: "+p2.getRut_Empresa());
+                                Log.d("PPP", document.getId() + " => " + document.getData());
+                                carroPan.putExtra(CarroComprasCliente.idSubproducto,p2.getId_producto());
+                                carroPan.putExtra(CarroComprasCliente.rut_proveedor,p2.getRut_Empresa());
+                                carroPan.putExtra(CarroComprasCliente.precio,p2.getPrecio());
+                                carroPan.putExtra(CarroComprasCliente.nombre,p2.getNom_tipoSubProducto());
+                                carroPan.putExtra(CarroComprasCliente.unidad,p2.getTipoVentaProducto());
+                                startActivity(carroPan);
+                                finish();
+
+                            }
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
     }
 

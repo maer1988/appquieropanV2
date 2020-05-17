@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 
 import com.example.appquieropan.Adaptadores.Cliente.RecyclerProductoLista;
 import com.example.appquieropan.Cliente.CarroDeCompras.mailer.SendMailAsynTask;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -33,6 +35,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -53,6 +58,7 @@ public class ComprobanteReservaCliente extends AppCompatActivity  implements Vie
     RecyclerView mRecyclerView;
 
     private BottomNavigationView botonesNav;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,150 +132,103 @@ public class ComprobanteReservaCliente extends AppCompatActivity  implements Vie
     }
 
     public void CargaListadoReserva(){
-        Log.d("VUI",""+idVoucher);
 
-databaseReference.child("Voucher").addListenerForSingleValueEvent(new ValueEventListener() {
-    @Override
-    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
-        for (DataSnapshot VoucherSnapshot1:dataSnapshot.getChildren()){
-
-            Voucher v = VoucherSnapshot1.getValue(Voucher.class);
-
-        if (v.getIDVoucher().equals(idVoucher)){
-
-                    voucher_lista.add(v);
-
-        }
-}
-
-        NroTransaccion.setText(Html.fromHtml("<b>ID: </b> "+voucher_lista.get(0).getIDVoucher()));
-        FechaRetiroPago.setText(Html.fromHtml("<b>Fecha Retiro:</b> "+voucher_lista.get(0).getFechaentrega()));
-
-        Log.d("VUI",""+voucher_lista.get(0).getIDVoucher());
-
-        databaseReference.child("Cliente").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot ClienteSnapshot1:dataSnapshot.getChildren()){
-
-                    Cliente c = ClienteSnapshot1.getValue(Cliente.class);
-
-                    if(c.getId_cliente().equals(voucher_lista.get(0).getIDcliente())){
-
-                        cliente_lista.add(c);
-                    }
-
-
-                }
-
-                ClientePago.setText(Html.fromHtml("<b>Cliente: </b>"+cliente_lista.get(0).getNom_cliente()));
-
-
-                databaseReference.child("Proveedor").addListenerForSingleValueEvent(new ValueEventListener() {
+        db.collection("Voucher")
+                .whereEqualTo("idvoucher", idVoucher)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-
-                        for (DataSnapshot ProveedorSnapshot1:dataSnapshot.getChildren()){
-
-                            Proveedor p = ProveedorSnapshot1.getValue(Proveedor.class);
-
-                            if(p.getUid().equals(voucher_lista.get(0).getIDproveedor())){
-
-                                proveedor_lista.add(p);
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Voucher v = document.toObject(Voucher.class);
+                                voucher_lista.add(v);
                             }
 
+                            NroTransaccion.setText(Html.fromHtml("<b>ID: </b> "+voucher_lista.get(0).getIDVoucher()));
+                            FechaRetiroPago.setText(Html.fromHtml("<b>Fecha Retiro:</b> "+voucher_lista.get(0).getFechaentrega()));
 
+                            db.collection("Cliente")
+                                    .whereEqualTo("id_cliente", voucher_lista.get(0).getIDcliente())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task2) {
+                                            if (task2.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document2 : task2.getResult()) {
+                                                    Cliente c = document2.toObject(Cliente.class);
+                                                    cliente_lista.add(c);
+                                                }
+
+                                                ClientePago.setText(Html.fromHtml("<b>Cliente: </b>"+cliente_lista.get(0).getNom_cliente()));
+
+                                                db.collection("Proveedor")
+                                                        .whereEqualTo("id_proveedor", voucher_lista.get(0).getIDproveedor())
+                                                        .get()
+                                                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<QuerySnapshot> task3) {
+                                                                if (task3.isSuccessful()) {
+                                                                    for (QueryDocumentSnapshot document3 : task3.getResult()) {
+
+                                                                        Proveedor p = document3.toObject(Proveedor.class);
+                                                                        proveedor_lista.add(p);
+                                                                    }
+
+                                                                    NombreProveedorPago.setText(Html.fromHtml("<b>Direccion retiro: </b>"+proveedor_lista.get(0).getDireccion_proveedor()));
+                                                                    RutClientePago.setText(Html.fromHtml("<b>Vendedor: </b>"+proveedor_lista.get(0).getNom_proveedor()));
+
+                                                                }
+
+                                                                else {
+                                                                    Log.d("TAG", "Error getting documents: ", task3.getException());
+                                                                }
+                                                            }
+                                                        });
+
+                                            } else {
+                                                Log.d("TAG", "Error getting documents: ", task2.getException());
+                                            }
+                                        }
+                                    });
+
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-
-                        NombreProveedorPago.setText(Html.fromHtml("<b>Direccion retiro: </b>"+proveedor_lista.get(0).getDireccion_proveedor()));
-                        RutClientePago.setText(Html.fromHtml("<b>Vendedor: </b>"+proveedor_lista.get(0).getNom_proveedor()));
-
-
-
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
-
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-
-
-
-
-
-
-
-    }
-
-    @Override
-    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-    }
-});
-
-
-
-
 
     }
 
     public void CargarRecyclerView(final RecyclerView recyclerView){
 
+        db.collection("Producto_Detalle")
+                .whereEqualTo("idCliente", firebaseAuth.getCurrentUser().getUid())
+                .whereEqualTo("idvoucher", idVoucher)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-        databaseReference.child("Producto_Detalle").addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot objSnatshot : dataSnapshot.getChildren()) {
-
-                    Log.e("cantidad",""+dataSnapshot.getChildrenCount());
-                    Producto_Detalle pd = objSnatshot.getValue(Producto_Detalle.class);
+                            Log.d("CRC", "entroo: ", task.getException());
 
 
-                    if (pd.getIDvoucher().equals(idVoucher) && pd.getIdCliente().equals(firebaseAuth.getCurrentUser().getUid())) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Producto_Detalle pd = document.toObject(Producto_Detalle.class);
+                                producto_detalle_lista.add(pd);
+                                Log.d("TAG1", document.getId() + " => " + document.getData());
 
-                        producto_detalle_lista.add(pd);
-                        Log.e("pd1",""+pd.getIDvoucher());
-                        Log.e("pd2",""+pd.getNombre_producto());
+                            }
 
+                            RecyclerProductoLista = new RecyclerProductoLista(producto_detalle_lista);
+                            recyclerView.setAdapter(RecyclerProductoLista);
+
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-
-                RecyclerProductoLista = new RecyclerProductoLista(producto_detalle_lista);
-
-
-                recyclerView.setAdapter(RecyclerProductoLista);
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
+                });
 
     }
 
@@ -347,57 +306,39 @@ databaseReference.child("Voucher").addListenerForSingleValueEvent(new ValueEvent
 
     public void enviarCorreo(){
 
+          db.collection("Producto_Detalle")
+                .whereEqualTo("idCliente", firebaseAuth.getCurrentUser().getUid())
+                .whereEqualTo("idvoucher", idVoucher)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        String encabezado="con este comprobante puede retirar su producto\n" +
+                                NroTransaccion.getText()+"\n" +
+                                ClientePago.getText()+"\n" +
+                                FechaRetiroPago.getText()+"\n" +
+                                NombreProveedorPago.getText()+"\n" +
+                                RutClientePago.getText()+"\n";
 
 
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Producto_Detalle pd = document.toObject(Producto_Detalle.class);
+                                producto_detalle_lista.add(pd);
+                                encabezado=encabezado+"Producto: "+pd.getNombre_producto()+"  "+pd.getCantidad()+" "+pd.getTipo_cantidad()+"\n";
 
-        databaseReference.child("Producto_Detalle").addListenerForSingleValueEvent(new ValueEventListener() {
+                            }
 
+                            new SendMailAsynTask(ComprobanteReservaCliente.this,firebaseAuth.getCurrentUser().getEmail(), "Comprobante de reserva", ""+encabezado).execute();
 
-            String encabezado="con este comprobante puede retirar su producto\n" +
-                    NroTransaccion.getText()+"\n" +
-                    ClientePago.getText()+"\n" +
-                    FechaRetiroPago.getText()+"\n" +
-                    NombreProveedorPago.getText()+"\n" +
-                    RutClientePago.getText()+"\n";
-
-
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot objSnatshot : dataSnapshot.getChildren()) {
-
-                    Log.e("cantidad",""+dataSnapshot.getChildrenCount());
-                    Producto_Detalle pd = objSnatshot.getValue(Producto_Detalle.class);
+                            Toast.makeText(ComprobanteReservaCliente.this, "El correo fue enviado exitosamente!", Toast.LENGTH_SHORT).show();
 
 
-                    if (pd.getIDvoucher().equals(idVoucher) && pd.getIdCliente().equals(firebaseAuth.getCurrentUser().getUid())) {
-
-                        producto_detalle_lista.add(pd);
-                        Log.e("pd1",""+pd.getIDvoucher());
-                        Log.e("pd2",""+pd.getNombre_producto());
-
-                        encabezado=encabezado+"Producto: "+pd.getNombre_producto()+"  "+pd.getCantidad()+" "+pd.getTipo_cantidad()+"\n";
-
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
+                        }
                     }
-
-                }
-
-
-
-
-                new SendMailAsynTask(ComprobanteReservaCliente.this,firebaseAuth.getCurrentUser().getEmail(), "Comprobante de reserva", ""+encabezado).execute();
-
-                Toast.makeText(ComprobanteReservaCliente.this, "El correo fue enviado exitosamente!", Toast.LENGTH_SHORT).show();
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+                });
 
     }
 

@@ -37,14 +37,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class loginProveedor extends AppCompatActivity implements View.OnClickListener {
 
 
     private FirebaseAuth firebaseAuth;
-    private DatabaseReference mDatabase;
     GoogleSignInClient mGoogleSignInClient;
     SignInButton signInButton;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +62,6 @@ public class loginProveedor extends AppCompatActivity implements View.OnClickLis
 
         //inicializamos el objeto firebaseAuth
         firebaseAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
         //Referenciamos los views
 
 
@@ -113,6 +114,9 @@ public class loginProveedor extends AppCompatActivity implements View.OnClickLis
                             Log.d("T", "signInWithCredential:success");
                             FirebaseUser user = firebaseAuth.getCurrentUser();
                             registrarUsuario();
+                            Intent intencion = new Intent(getApplication(), homeProveedor.class);
+                            startActivity(intencion);
+                            finish();//finaliza actividad
                             dialog.dismiss();
                         } else {
                             // If sign in fails, display a message to the user.
@@ -130,42 +134,35 @@ public class loginProveedor extends AppCompatActivity implements View.OnClickLis
 
     private void registrarUsuario() {
 
-        mDatabase.child("Proveedor").orderByChild("uid").equalTo(firebaseAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+        db.collection("Proveedor")
+                .whereEqualTo("id_proveedor",firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
 
-                if (dataSnapshot.exists() == false){
+                            if (task.getResult().isEmpty()) {
 
-                    Proveedor p = new Proveedor();
+                                Proveedor p = new Proveedor();
 
+                                p.setEmail_proveedor(firebaseAuth.getCurrentUser().getEmail());
+                                p.setId_proveedor(firebaseAuth.getCurrentUser().getUid());
 
-                    p.setEmail_proveedor(firebaseAuth.getCurrentUser().getEmail());
-                    p.setUid(firebaseAuth.getCurrentUser().getUid());
+                                db.collection("Proveedor").document(firebaseAuth.getCurrentUser().getUid()).set(p);
 
+                            }
+                            else
+                            {
+                                Log.d("MMM1", "YA EXISTE EL Proveedor");
+                            }
+                        }
+                        else {
+                            Log.d("MMMM2", "Error getting documents: ", task.getException());
+                        }
+                    }
 
-                    mDatabase.child("Proveedor").child(p.getUid()).setValue(p);
-
-                    Intent intencion = new Intent(getApplication(), registroProveedor.class);
-                    intencion.putExtra(registroProveedor.codigoProvve, p.getUid());
-                    startActivity(intencion);
-                    finish();
-
-                }else {
-                    Log.d("EX", "YA EXISTE EL CLIENTE");
-                    Intent intencion = new Intent(getApplication(), homeProveedor.class);
-                    intencion.putExtra(homeProveedor.codigoProvve,firebaseAuth.getCurrentUser().getUid());
-                    startActivity(intencion);
-                    finish();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
+                });
     }
 
     @Override
@@ -176,7 +173,6 @@ public class loginProveedor extends AppCompatActivity implements View.OnClickLis
 
             // Toast.makeText(this, "usuario ya logueado", Toast.LENGTH_LONG).show();
             Intent intencion = new Intent(getApplication(), homeProveedor.class);
-            intencion.putExtra(HomeCliente.idCliente,currentUser.getUid());
             startActivity(intencion);
         }
     }

@@ -25,6 +25,8 @@ import com.example.appquieropan.Entidad.Voucher;
 import com.example.appquieropan.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
 import com.google.android.gms.wallet.IsReadyToPayRequest;
@@ -38,6 +40,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,9 +57,9 @@ public class PagoDelCliente extends AppCompatActivity implements View.OnClickLis
 
     private ImageView imgGpay, imgReserva;
     private TextView Total;
-    DatabaseReference databaseReference;
     private FirebaseAuth firebaseAuth;
     public static final String tipo_pago="tp";
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static final String Total_voucher="";
     String TipoPago;
@@ -63,6 +68,7 @@ public class PagoDelCliente extends AppCompatActivity implements View.OnClickLis
     Button cancelar;
     ArrayList<Cliente> Cliente = new ArrayList<Cliente>();
     ArrayList<Producto_Pedido> producto_pedido = new ArrayList<Producto_Pedido>();
+    ArrayList<String> Id_pedido = new ArrayList<String>();
     ArrayList<Proveedor> proveedorlista = new ArrayList<Proveedor>();
 
     private BottomNavigationView botonesNav;
@@ -84,7 +90,7 @@ public class PagoDelCliente extends AppCompatActivity implements View.OnClickLis
        // Total.setText(set_total());
 
         firebaseAuth = FirebaseAuth.getInstance();
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+
 
 
         imgGpay = findViewById(R.id.imgGpay);
@@ -183,48 +189,7 @@ public class PagoDelCliente extends AppCompatActivity implements View.OnClickLis
     }
 
 
-    private String set_total(){
 
-        databaseReference.child("Producto_pedido").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for(DataSnapshot TotalSnapshot:dataSnapshot.getChildren()){
-
-                    Producto_Pedido pp = TotalSnapshot.getValue(Producto_Pedido.class);
-
-                    Log.e("count","tamaño devuelto ->>"+producto_pedido.size());
-
-                    if(pp.getIdCliente().equals(firebaseAuth.getCurrentUser().getUid()) && pp.getEstado().equals("nuevo")){
-
-                        producto_pedido.add(pp);
-
-                        Log.e("PEDIDO","tamaño devuelto ->>"+producto_pedido.size());
-
-                        monto= monto + Integer.parseInt(pp.total_precio());
-
-
-
-                    }
-
-
-
-                }
-
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
-        return Integer.toString(monto);
-    }
 
     @Override
     public void onClick(View v) {
@@ -253,154 +218,123 @@ public class PagoDelCliente extends AppCompatActivity implements View.OnClickLis
     private void reservaProducto( final Intent pagoR) {
 
 
-
-
-        databaseReference.child("Cliente").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot ClientedataSnapshot1:dataSnapshot.getChildren()) {
-
-                    Cliente cc = ClientedataSnapshot1.getValue(Cliente.class);
-
-
-                    if (cc.getId_cliente().equals(firebaseAuth.getCurrentUser().getUid())) {
-                        Cliente.add(cc);
-                    }
-
-                }
-
-                Log.e("CLIENTE","tamaño devuelto"+Cliente.size() + " UID"+ Cliente.get(0).getId_cliente());
-
-                databaseReference.child("Producto_pedido").addListenerForSingleValueEvent(new ValueEventListener() {
+        db.collection("Producto_pedido")
+                .whereEqualTo("estado", "nuevo")
+                .whereEqualTo("idCliente", firebaseAuth.getCurrentUser().getUid())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        for(DataSnapshot Producto_pedidoSnapshot:dataSnapshot.getChildren()){
-
-                            Producto_Pedido pp = Producto_pedidoSnapshot.getValue(Producto_Pedido.class);
-
-                            if(pp.getIdCliente().equals(Cliente.get(0).getId_cliente()) && pp.getEstado().equals("nuevo")){
-
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Id_pedido.add(document.getId());
+                                Producto_Pedido pp = document.toObject(Producto_Pedido.class);
                                 producto_pedido.add(pp);
-
-                                Log.e("PEDIDO","tamaño devuelto ->>"+producto_pedido.size());
-
                                 total= total + Integer.parseInt(pp.total_precio());
-
-
 
                             }
 
 
+                            db.collection("Proveedor")
+                                    .whereEqualTo("rut_proveedor", producto_pedido.get(0).getRut_proveedor())
+                                    .get()
+                                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                            if (task.isSuccessful()) {
+                                                for (QueryDocumentSnapshot document : task.getResult()) {
 
+
+                                                    Proveedor p = document.toObject(Proveedor.class);
+                                                    proveedorlista.add(p);
+                                                }
+
+
+                                                Voucher voucher = new Voucher();
+
+                                                voucher.setIDVoucher(UUID.randomUUID().toString());
+                                                voucher.setIDcliente(firebaseAuth.getCurrentUser().getUid());
+                                                voucher.setRUTproveedor(proveedorlista.get(0).getRut_proveedor());
+                                                voucher.setIDproveedor(proveedorlista.get(0).getId_proveedor());
+                                                voucher.setNombreproveedor(proveedorlista.get(0).getNom_proveedor());
+                                                voucher.setFechaentrega(getFechaActual());
+                                                voucher.setTotal(Integer.toString(total));
+                                                voucher.setTipoVenta(TipoPago);
+
+													/* Log.e("VOUCHER","id "+voucher.getIDVoucher());
+														Log.e("VOUCHER","id cliente "+voucher.getIDcliente());
+														Log.e("VOUCHER","id provedore "+voucher.getIDproveedor());
+														Log.e("VOUCHER","fecha "+voucher.getFechaentrega());*/
+
+
+
+                                                db.collection("Voucher").document().set(voucher);
+
+                                                for (int z = 0; z < producto_pedido.size(); z++) {
+                                                    Log.e("tamaño en voucher","tamaño "+producto_pedido.size());
+                                                    Producto_Pedido ppu = new Producto_Pedido();
+
+                                                    ppu.setUid(producto_pedido.get(z).getUid());
+                                                    ppu.setEstado("terminado");
+                                                    ppu.setTipo_cantidad(producto_pedido.get(z).getTipo_cantidad());
+                                                    ppu.setRut_proveedor(producto_pedido.get(z).getRut_proveedor());
+                                                    ppu.setPrecio(producto_pedido.get(z).getPrecio());
+                                                    ppu.setNombre_producto(producto_pedido.get(z).getNombre_producto());
+                                                    ppu.setIdCliente(producto_pedido.get(z).getIdCliente());
+                                                    ppu.setCantidad(producto_pedido.get(z).getCantidad());
+                                                    ppu.setIDvoucher(voucher.getIDVoucher());
+
+
+                                                    db.collection("Producto_Detalle").document().set(ppu);
+
+
+
+                                                }
+
+
+                                                for(int i=0;i < Id_pedido.size();i++) {
+                                                    db.collection("Producto_pedido").document(Id_pedido.get(i))
+                                                            .delete()
+                                                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                                @Override
+                                                                public void onSuccess(Void aVoid) {
+                                                                    Log.d("TAG", "DocumentSnapshot successfully deleted!");
+                                                                }
+                                                            })
+                                                            .addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    Log.w("TAG", "Error deleting document", e);
+                                                                }
+                                                            });
+                                                }
+
+
+
+                                                pagoR.putExtra(ComprobanteReservaCliente.voucher_post,voucher.getIDVoucher());
+                                                startActivity(pagoR);
+                                                finish();
+
+
+
+
+
+                                            }
+
+
+                                            else {
+                                                Log.d("TAG", "Error getting documents: ", task.getException());
+                                            }
+                                        }
+                                    });
+
+
+
+                        } else {
+                            Log.d("TAG", "Error getting documents: ", task.getException());
                         }
-
-
-    databaseReference.child("Proveedor").addListenerForSingleValueEvent(new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-            for (DataSnapshot ProveedorSnapshot : dataSnapshot.getChildren()) {
-
-
-                Proveedor p = ProveedorSnapshot.getValue(Proveedor.class);
-
-                Log.e("Producto_pedido", "rut ->>" + producto_pedido.get(0).getRut_proveedor());
-
-                if (producto_pedido.get(0).getRut_proveedor().equals(p.getRut_proveedor())) {
-
-
-                    Log.e("ENTROO", "ENTROOO");
-                    proveedorlista.add(p);
-                    // Log.e("Proveedor","tamaño devuelto ->>"+proveedorlista.get(0).getUid());
-
-
-                }
-
-                //
-
-            }
-
-
-
-            Log.e("Proveedor", "tamaño devuelto ->>" + proveedorlista.get(0).getUid());
-
-
-            Voucher voucher = new Voucher();
-
-            voucher.setIDVoucher(UUID.randomUUID().toString());
-            voucher.setIDcliente(Cliente.get(0).getId_cliente());
-            voucher.setRUTproveedor(proveedorlista.get(0).getRut_proveedor());
-            voucher.setIDproveedor(proveedorlista.get(0).getUid());
-            voucher.setNombreproveedor(proveedorlista.get(0).getNom_proveedor());
-            voucher.setFechaentrega(getFechaActual());
-            voucher.setTotal(Integer.toString(total));
-            voucher.setTipoVenta(TipoPago);
-
-                               /* Log.e("VOUCHER","id "+voucher.getIDVoucher());
-                                Log.e("VOUCHER","id cliente "+voucher.getIDcliente());
-                                Log.e("VOUCHER","id provedore "+voucher.getIDproveedor());
-                                Log.e("VOUCHER","fecha "+voucher.getFechaentrega());*/
-
-
-            databaseReference.child("Voucher").child(voucher.getIDVoucher()).setValue(voucher);
-
-            for (int z = 0; z < producto_pedido.size(); z++) {
-                Log.e("tamaño en voucher","tamaño "+producto_pedido.size());
-                Producto_Pedido ppu = new Producto_Pedido();
-
-                ppu.setUid(producto_pedido.get(z).getUid());
-                ppu.setEstado("terminado");
-                ppu.setTipo_cantidad(producto_pedido.get(z).getTipo_cantidad());
-                ppu.setRut_proveedor(producto_pedido.get(z).getRut_proveedor());
-                ppu.setPrecio(producto_pedido.get(z).getPrecio());
-                ppu.setNombre_producto(producto_pedido.get(z).getNombre_producto());
-                ppu.setIdCliente(producto_pedido.get(z).getIdCliente());
-                ppu.setCantidad(producto_pedido.get(z).getCantidad());
-                ppu.setIDvoucher(voucher.getIDVoucher());
-
-
-
-                databaseReference.child("Producto_Detalle").child(ppu.getUid()).setValue(ppu);
-
-
-            }
-
-            databaseReference.child("Producto_pedido").removeValue();
-
-            pagoR.putExtra(ComprobanteReservaCliente.voucher_post,voucher.getIDVoucher());
-            startActivity(pagoR);
-            finish();
-
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    });
-
-
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
                 });
-
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
 
 
 
