@@ -15,10 +15,10 @@ public class Proveedor {
     private String passwordProveedor;
     private String nomContacto_proveedor;
     private String nota_proveeedor;
-    private String tipo_Despacho_Proveedor="local";
+    private String tipo_Despacho_Proveedor="Local";
     private String tipo_Pago_Proveedor="efectivo";
-    private String latitud="-33.4379352";
-    private String longitud="-70.6503999";
+    private String latitud;
+    private String longitud;
 
 
     public Proveedor() {

@@ -30,6 +30,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class registroProveedor extends AppCompatActivity implements View.OnClickListener {
 
@@ -89,31 +91,61 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
 
     }
 
-    public void registraNuevoUsuario(String rut, String razon, String direccion){
+    public void registraNuevoUsuario(String rut, String razon, final String direccion){
+
+        db.collection("Proveedor")
+                .whereEqualTo("rut_proveedor", rut)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+
+                            if(task.getResult().isEmpty()){
 
 
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                String uid = user.getUid();
+
+                                int numero = (int)(Math.random()*(30-10+1)+10);
+                                int numero2 = (int)(Math.random()*(30-10+1)+10);
+
+                                Proveedor proveedor = new Proveedor();
+                                proveedor.setId_proveedor(uid);
+                                proveedor.setNom_proveedor(rSocial.getText().toString().trim());
+                                proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
+                                proveedor.setDireccion_proveedor(rDireccion.getText().toString().trim());
+                                //seteo momentaneo
+                                proveedor.setLatitud("-33.4"+numero2+"3793"+numero);
+                                proveedor.setLongitud("-70.6"+numero+"503"+numero2);
+                                String id = uid;
 
 
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            String uid = user.getUid();
+                                db.collection("Proveedor").document(uid).set(proveedor);
+                                new GetCoordinates().execute(direccion.replace(" ","+"));
 
-                            Proveedor proveedor = new Proveedor();
-                            proveedor.setId_proveedor(uid);
-                            proveedor.setNom_proveedor(rSocial.getText().toString().trim());
-                            proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-                            proveedor.setDireccion_proveedor(rDireccion.getText().toString().trim());
-                            String id = uid;
+                                Intent intentP = new Intent(getApplication(), homeProveedor.class);
+                                intentP.putExtra(homeProveedor.codigoProvve, mAuth.getCurrentUser().getUid());
+                                startActivity(intentP);
+                                finish();
+
+                            }
+
+                            else{
+                                Toast toast1 =
+                                        Toast.makeText(getApplicationContext(),
+                                                "EL RUT INGRESADO YA EXISTE!", Toast.LENGTH_SHORT);
+
+                                toast1.show();
+                            }
 
 
-                            db.collection("Proveedor").document(uid).set(proveedor);
-                            new GetCoordinates().execute(direccion.replace(" ","+"));
-
-                            Intent intentP = new Intent(getApplication(), homeProveedor.class);
-                            intentP.putExtra(homeProveedor.codigoProvve, id);
-                            startActivity(intentP);
-                            finish();
-
-
+                        }
+                        else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
 
 
                     }

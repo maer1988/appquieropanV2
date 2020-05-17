@@ -22,9 +22,11 @@ import android.widget.Toast;
 
 import com.example.appquieropan.Entidad.Producto;
 import com.example.appquieropan.Entidad.Proveedor;
+import com.example.appquieropan.Proveedor.opcionesSegmentoProveedor;
 import com.example.appquieropan.Entidad.TipoSubProducto;
 import com.example.appquieropan.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +35,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -42,6 +45,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class ingresaSubProductoPan extends AppCompatActivity implements View.OnClickListener  {
@@ -207,7 +212,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
                                     while (!uri.isComplete());
                                     Uri url = uri.getResult();
                                     //objeto de tipo subproducto
-                                    Producto tipoSubProducto = new Producto();
+                                    final Producto tipoSubProducto = new Producto();
 
                                     tipoSubProducto.setUid(UUID.randomUUID().toString());
                                     tipoSubProducto.setNom_tipoSubProducto(nombrePan);
@@ -220,7 +225,54 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
                                     tipoSubProducto.setId_producto(tipoSubProducto.getUid());
 
 
-                                    db.collection("producto").document(tipoSubProducto.getUid()).set(tipoSubProducto);
+                                     db.collection("producto").document(tipoSubProducto.getUid()).set(tipoSubProducto).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                         @Override
+                                         public void onSuccess(Void aVoid) {
+                                             Log.d("TAG", "producto creado correctamente");
+                                         }
+                                     })
+                                             .addOnFailureListener(new OnFailureListener() {
+                                                 @Override
+                                                 public void onFailure(@NonNull Exception e) {
+                                                     Log.w("TAG", "Error writing document", e);
+                                                 }
+                                             });
+
+
+
+                                    db.collection("proveedor_categoria")
+                                            .whereEqualTo("categoria",tipo_cat)
+                                            .whereEqualTo("rut_proveedor", rutEmpresa)
+                                            .get()
+                                            .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
+
+                                                @Override
+                                                public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                                    Log.d("TAG", "entro en la consulta");
+
+                                                    if (task.isSuccessful()) {
+                                                      if(task.getResult().isEmpty()){
+                                                          CollectionReference prove_categoria = db.collection("proveedor_categoria");
+                                                          Map<String, Object> data1 = new HashMap<>();
+                                                          data1.put("categoria", tipoSubProducto.getCategoria());
+                                                          data1.put("rut_proveedor", tipoSubProducto.getRut_Empresa());
+                                                          prove_categoria.document().set(data1);
+                                                      }
+                                                          else
+                                                              {
+
+                                                                  Log.d("TAG", "ya existe referencia", task.getException());
+
+                                                      }
+
+                                                        }
+                                                     else {
+                                                        Log.d("TAG", "Error getting documents: ", task.getException());
+                                                    }
+                                                }
+                                            });
+
 
 
                                     Toast.makeText(ingresaSubProductoPan.this,"Archivo subido",Toast.LENGTH_SHORT).show();
@@ -259,7 +311,7 @@ public class ingresaSubProductoPan extends AppCompatActivity implements View.OnC
         edtNombre.setText("");
         edtDescripcion.setText("");
         edtPrecio.setText("");
-        Intent cliente = new Intent(getApplication(), ListaProductosPan.class);
+        Intent cliente = new Intent(getApplication(), opcionesSegmentoProveedor.class);
         cliente.putExtra(ListaProductosPan.codigoProvve,userP);
         startActivity(cliente);
         finish();

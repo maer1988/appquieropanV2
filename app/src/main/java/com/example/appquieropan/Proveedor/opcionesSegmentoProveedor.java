@@ -127,14 +127,14 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
                 break;
             case R.id.btnAmansanderia:
 
-                Intent intenta = new Intent(this, ListaProductosMasa.class);
+                Intent intenta = new Intent(this, ListaProductosPan.class);
                 intenta.putExtra(ListaProductosPan.codigoProvve,userP);
                 intenta.putExtra(ListaProductosPan.categoria,"amasanderia");
                 startActivity(intenta);
                 break;
             case R.id.btnPasteleria:
 
-                Intent intentPs = new Intent(this, ListaProductosPastel.class);
+                Intent intentPs = new Intent(this, ListaProductosPan.class);
                 intentPs.putExtra(ListaProductosPan.codigoProvve,userP);
                 intentPs.putExtra(ListaProductosPan.categoria,"pasteleria");
                 startActivity(intentPs);

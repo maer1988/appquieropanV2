@@ -351,6 +351,12 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
                 });
             }
 
+            Intent intent = new Intent(PerfilProveedor.this, homeProveedor.class);
+            intent.putExtra(homeProveedor.codigoProvve,idProvee);
+            startActivity(intent);
+            finish();
+
+
         }
 
         else{
@@ -469,27 +475,39 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         edtRutEmpresa.setText(rut);
         edtDireccion.setText(dire);
         edtTelefono.setText(fono);
-/*
-        if (pago == "ambosPagos"){
+
+        Log.d("PAGO", "pago =>>"+pago);
+
+        if (pago.equals("ambosPagos")){
             Toast.makeText(this, "ambas", Toast.LENGTH_SHORT).show();
-            opcionO.isChecked();
-            opcionE.isChecked();
-        }else if(pago == "Efectivo"){
+            opcionO.setChecked(true);
+            opcionE.setChecked(true);
+        }else if(pago.equals("efectivo")){
             Toast.makeText(this, "ee", Toast.LENGTH_SHORT).show();
-            opcionE.isChecked();
-        }else if(pago == "Online"){
+            opcionE.setChecked(true);
+        }else if(pago.equals("online")){
             Toast.makeText(this, "oo", Toast.LENGTH_SHORT).show();
-            opcionO.isChecked();
+            opcionO.setChecked(true);
         }else{
             Toast.makeText(this, pago, Toast.LENGTH_SHORT).show();
         }
-*/
-        if (despacho == "Local"){
-            Toast.makeText(this, "ambas", Toast.LENGTH_SHORT).show();
-            opcionL.isChecked();
 
-        }else{
-            Toast.makeText(this, despacho, Toast.LENGTH_SHORT).show();
+        if (despacho.equals("Local")){
+            Toast.makeText(this, "ambas", Toast.LENGTH_SHORT).show();
+            opcionL.setChecked(true);
+
+        }else if (despacho.equals("Domicilio")){
+
+            opcionD.setChecked(true);
+        }else if(despacho.equals("ambasEntrega")){
+            opcionL.setChecked(true);
+            opcionD.setChecked(true);
+
+        }
+
+        else{
+            Toast.makeText(this, pago, Toast.LENGTH_SHORT).show();
+
         }
         //txtPrecio.setText(prec);
         //imgProducto.setTextDirection(url);
@@ -544,6 +562,14 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
 
         Toast.makeText(PerfilProveedor.this,"Pefil actualizado",Toast.LENGTH_SHORT).show();
+
+
+        Intent intent = new Intent(PerfilProveedor.this, homeProveedor.class);
+        intent.putExtra(homeProveedor.codigoProvve,idProvee);
+        startActivity(intent);
+        finish();
+
+
 
     }
 }

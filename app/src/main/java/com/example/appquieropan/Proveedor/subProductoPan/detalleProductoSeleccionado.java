@@ -223,7 +223,7 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
                                 Log.d("TAG", document.getId() + " => " + document.getData());
                                 Producto subProducto = document.toObject(Producto.class);
-                                cargaDatosPantalla(subProducto.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(), subProducto.getPrecio(), subProducto.getUrlSubproducto(),subProducto.getRut_Empresa(),subProducto.getCategoria());
+                                cargaDatosPantalla(subProducto.getNom_tipoSubProducto(), subProducto.getDesc_tipoSubProducto(), subProducto.getPrecio(), subProducto.getUrlSubproducto(),subProducto.getRut_Empresa(),subProducto.getCategoria(),subProducto.getTipoVentaProducto());
                                 urlGuardada = subProducto.getUrlSubproducto();
 
                             }
@@ -236,13 +236,22 @@ public class detalleProductoSeleccionado extends AppCompatActivity implements Vi
 
                 }
 
-    private void cargaDatosPantalla(String sub, String des,String prec, String url,String rut,String ca ) {
+    private void cargaDatosPantalla(String sub, String des,String prec, String url,String rut,String ca,String tv ) {
 
         txtEdnombre.setText(sub);
         txtDescripcion.setText(des);
         txtPrecio.setText(prec);
         rut_emp.setText(rut);
         categoria.setText(ca);
+        if(tv.equals("Kilo")){
+            radio1.setChecked(true);
+        }
+        if(tv.equals("Unidad")){
+
+            radio2.setChecked(true);
+
+        }
+
         //imgProducto.setTextDirection(url);
         //Toast.makeText(this, ""+url, Toast.LENGTH_SHORT).show();
 
