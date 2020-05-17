@@ -10,7 +10,6 @@ public class Producto {
     private String precio;
     private String tipoVentaProducto;
     private String rut_Empresa;
-    private String Nom_empresa;
     private String categoria;
 
 
@@ -18,13 +17,7 @@ public class Producto {
     }
 
 
-    public String getNom_empresa() {
-        return Nom_empresa;
-    }
 
-    public void setNom_empresa(String nom_empresa) {
-        Nom_empresa = nom_empresa;
-    }
 
     public String getUid() {
         return uid;

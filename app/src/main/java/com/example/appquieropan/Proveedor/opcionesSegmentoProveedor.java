@@ -146,25 +146,6 @@ public class opcionesSegmentoProveedor extends AppCompatActivity implements View
 
     }
 
-    private void crearRelacionOtrasMasaProveedor() {
-
-        Producto producto = new Producto();
-        producto.setId_producto(userP);
-        producto.setDesc_tipoSubProducto("OtrasMasas");
-        producto.setRut_Empresa(rutEmpresa);
-        producto.setNom_empresa(nombreEmpresa);
-        //proveedor.setEmail_proveedor(email.getText().toString());
-        //proveedor.setNom_proveedor(rSocial.getText().toString().trim());
-        //proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
-
-
-    }
-
-
-
-
-
-
 
     private void obtieneRutEmpresa(final String userP) {
 
