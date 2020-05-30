@@ -81,6 +81,26 @@
             android:orientation="vertical">
 
             <EditText
+                android:id="@+id/lat"
+                android:layout_width="22dp"
+                android:layout_height="9dp"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:visibility="invisible"
+                tools:visibility="invisible" />
+
+            <EditText
+                android:id="@+id/lan"
+                android:layout_width="16dp"
+                android:layout_height="9dp"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:text="Name"
+                android:visibility="invisible"
+                tools:visibility="invisible" />
+
+            <EditText
                 android:id="@+id/edtRazonS"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

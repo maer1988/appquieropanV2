@@ -107,8 +107,8 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
                                 FirebaseUser user = mAuth.getCurrentUser();
                                 String uid = user.getUid();
 
-                                int numero = (int)(Math.random()*(30-10+1)+10);
-                                int numero2 = (int)(Math.random()*(30-10+1)+10);
+                                int numero = (int)(Math.random()*10+1);
+                                int numero2 = (int)(Math.random()*10+1);
 
                                 Proveedor proveedor = new Proveedor();
                                 proveedor.setId_proveedor(uid);
@@ -116,8 +116,8 @@ public class registroProveedor extends AppCompatActivity implements View.OnClick
                                 proveedor.setRut_proveedor(rutEmpresa.getText().toString().trim());
                                 proveedor.setDireccion_proveedor(rDireccion.getText().toString().trim());
                                 //seteo momentaneo
-                                proveedor.setLatitud("-33.4"+numero2+"3793"+numero);
-                                proveedor.setLongitud("-70.6"+numero+"503"+numero2);
+                                proveedor.setLatitud("-33.43793"+numero);
+                                proveedor.setLongitud("-70.65031"+numero2);
                                 String id = uid;
 
 

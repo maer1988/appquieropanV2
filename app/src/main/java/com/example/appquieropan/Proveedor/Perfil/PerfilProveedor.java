@@ -68,7 +68,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
     private Uri filepath;
     private int FOTO = 1;
     private int check= 1;
-    private EditText edtRazonSocial, edtRutEmpresa, edtDireccion,edtTelefono;
+    private EditText edtRazonSocial, edtRutEmpresa, edtDireccion,edtTelefono, lat,lan;
     String currentPhotoPath;
     static final int REQUEST_TAKE_PHOTO = 1;
     static final int REQUEST_IMAGE_GALLERY = 2;
@@ -113,6 +113,9 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         edtRutEmpresa = findViewById(R.id.edtRutE);
         edtDireccion = findViewById(R.id.edtDireccion);
         edtTelefono = findViewById(R.id.edtTelefono);
+        lat = findViewById(R.id.lat);
+        lan = findViewById(R.id.lan);
+
 
         opcionO = findViewById(R.id.checkOnline);
         opcionE = findViewById(R.id.checkEfectivo);
@@ -216,11 +219,13 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
     private void validaDatosEntrada() {
 
-        String rutE,nomE,dirE,telE,eleccionPago = null, eleccioEntrega = null;
+        String rutE,nomE,dirE,telE,LAT,LAN,eleccionPago = null, eleccioEntrega = null;
         nomE = edtRazonSocial.getText().toString().trim();
         rutE = edtRutEmpresa.getText().toString().trim();
         dirE = edtDireccion.getText().toString().trim();
         telE = edtTelefono.getText().toString();
+        LAT= lat.getText().toString();
+        LAN= lan.getText().toString();
 
         if(opcionO.isChecked() && !opcionE.isChecked()){
 
@@ -269,12 +274,12 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         if(check ==1 && !dirE.isEmpty() && !telE.isEmpty()){
             if(FOTO ==2){
 
-                actualizaFirebase(nomE,rutE,dirE,telE, FOTO, filepath,eleccionPago,eleccioEntrega);
+                actualizaFirebase(nomE,rutE,dirE,telE, FOTO, filepath,eleccionPago,eleccioEntrega,LAT,LAN);
                 Toast.makeText(this, "con foto", Toast.LENGTH_SHORT).show();
             }
             else{
 
-                actualizaDatosSinImagen(dirE,telE,eleccionPago,eleccioEntrega);
+                actualizaDatosSinImagen(dirE,telE,eleccionPago,eleccioEntrega,LAT,LAN);
                 Toast.makeText(this, "sin foto", Toast.LENGTH_SHORT).show();
 
             }
@@ -288,7 +293,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    private void actualizaFirebase(final String nomE, final String rutE, final String dirE, final String telE, int FOTO, Uri filepath, final String eleccionPago, final String eleccioEntrega) {
+    private void actualizaFirebase(final String nomE, final String rutE, final String dirE, final String telE, int FOTO, Uri filepath, final String eleccionPago, final String eleccioEntrega,final String lat,final String lan) {
 
         if (!TextUtils.isEmpty(dirE)){
 
@@ -327,6 +332,9 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
                                 proveedor.setFono1_proveedor(telE);
                                 proveedor.setTipo_Pago_Proveedor(eleccionPago);
                                 proveedor.setTipo_Despacho_Proveedor(eleccioEntrega);
+                                proveedor.setLatitud(lat);
+                                proveedor.setLongitud(lan);
+
                                 //proveedor.setTipoVentaProducto(datoRadio);
                                 proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
@@ -334,7 +342,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
                                 //databaseReference.child(databaseReference.push().getKey()).setValue(tipoSubProducto);
 
-                                Toast.makeText(PerfilProveedor.this,"Producto actualizado",Toast.LENGTH_SHORT).show();
+                                Toast.makeText(PerfilProveedor.this,"datos actualizados",Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
 
 
@@ -454,11 +462,12 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
                                 Log.e("Reales","" + proveedor.getNom_proveedor());
                                 cargaDatosPantalla(proveedor.getNom_proveedor(),proveedor.getRut_proveedor(),proveedor.getUrl_proveedor(),
                                         proveedor.getDireccion_proveedor(),proveedor.getFono1_proveedor(),proveedor.getTipo_Despacho_Proveedor(),
-                                        proveedor.getTipo_Pago_Proveedor());
+                                        proveedor.getTipo_Pago_Proveedor(),proveedor.getLatitud(),proveedor.getLongitud());
                                 urlGuardada = proveedor.getUrl_proveedor();
                                 nombrePre = proveedor.getNom_proveedor();
                                 correoPRe = proveedor.getEmail_proveedor();
                                 rutPre = proveedor.getRut_proveedor();
+
 
                             }
                         } else {
@@ -469,12 +478,14 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    private void cargaDatosPantalla(String nom, String rut,String url, String dire, String fono, String despacho, String pago) {
+    private void cargaDatosPantalla(String nom, String rut,String url, String dire, String fono, String despacho, String pago, String Lan,String Lat) {
 
         edtRazonSocial.setText(nom);
         edtRutEmpresa.setText(rut);
         edtDireccion.setText(dire);
         edtTelefono.setText(fono);
+        lat.setText(Lat);
+        lan.setText(Lan);
 
         Log.d("PAGO", "pago =>>"+pago);
 
@@ -541,7 +552,7 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
 
     }
 
-    private void actualizaDatosSinImagen(String direccion, String telefono, String opcionPago, String opcionEntrega) {
+    private void actualizaDatosSinImagen(String direccion, String telefono, String opcionPago, String opcionEntrega , String lat, String lan) {
 
         Proveedor proveedor = new Proveedor();
         //proveedor.setNom_proveedor("SEVPRO SPA");
@@ -556,6 +567,8 @@ public class PerfilProveedor extends AppCompatActivity implements View.OnClickLi
         proveedor.setTipo_Despacho_Proveedor(opcionEntrega);
         //proveedor.setTipoVentaProducto(datoRadio);
         proveedor.setUrl_proveedor(urlGuardada);
+        proveedor.setLatitud(lat);
+        proveedor.setLongitud(lan);
         proveedor.setId_proveedor(getIntent().getStringExtra("idProveedor"));
 
         db.collection("Proveedor").document(proveedor.getId_proveedor()).set(proveedor);

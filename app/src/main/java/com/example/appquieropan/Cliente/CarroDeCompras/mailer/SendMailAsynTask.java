@@ -15,9 +15,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-/**
- * Created by ps205 on 3/1/17.
- */
+
 
 public class SendMailAsynTask extends AsyncTask<Void, Void, Void> {
     //Declaring Variables
@@ -65,11 +63,13 @@ public class SendMailAsynTask extends AsyncTask<Void, Void, Void> {
 
         //Configuring properties for gmail
         //If you are not using gmail you may need to change the values
-        props.put("mail.smtp.host", "srv06.benzahosting.cl");
-        props.put("mail.smtp.port", "465");
-        props.put("mail.smtp.starttls.enable","true");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.starttls.required", "true");
+        props.put(" mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.port", "465");
 
 
         //Creating a new session
